@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nn-toybox"
+version = "0.1.0"
+description = "Tiny visual experiments showing how neural networks learn, organize, compress, and generate data."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "arcade>=3.3.3",
+  "matplotlib>=3.8",
+  "numpy>=1.24",
+  "pillow>=10",
+  "torch>=2.2",
+]
+
+[project.scripts]
+nn-toybox-train = "scripts.train:main"
+nn-toybox-view = "scripts.view:main"
+nn-toybox-capture-demo = "scripts.capture_demo:main"
+nn-toybox-smoke = "scripts.smoke:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["core*", "scripts*", "demos*"]

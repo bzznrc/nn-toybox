@@ -1,0 +1,40 @@
+"""Shared runtime and window defaults."""
+
+from __future__ import annotations
+
+from core.arcade_style import (
+    DEFAULT_BOTTOM_BAR_HEIGHT as BB_HEIGHT,
+    DEFAULT_CELL_INSET as CELL_INSET,
+    DEFAULT_GRID_COLUMNS as GRID_WIDTH_TILES,
+    DEFAULT_GRID_ROWS as GRID_HEIGHT_TILES,
+    DEFAULT_TILE_SIZE as TILE_SIZE,
+    screen_height,
+    screen_width,
+)
+
+
+SHOW_FPS = 60
+TRAINING_FPS = 0
+
+SCREEN_WIDTH = screen_width(GRID_WIDTH_TILES, TILE_SIZE)
+SCREEN_HEIGHT = screen_height(GRID_HEIGHT_TILES, TILE_SIZE, BB_HEIGHT)
+PLAYFIELD_HEIGHT = SCREEN_HEIGHT - BB_HEIGHT
+WORLD_WIDTH = SCREEN_WIDTH
+WORLD_HEIGHT = PLAYFIELD_HEIGHT
+
+
+__all__ = [
+    "BB_HEIGHT",
+    "CELL_INSET",
+    "GRID_HEIGHT_TILES",
+    "GRID_WIDTH_TILES",
+    "PLAYFIELD_HEIGHT",
+    "SCREEN_HEIGHT",
+    "SCREEN_WIDTH",
+    "SHOW_FPS",
+    "TILE_SIZE",
+    "TRAINING_FPS",
+    "WORLD_HEIGHT",
+    "WORLD_WIDTH",
+]
+
