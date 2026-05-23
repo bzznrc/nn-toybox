@@ -53,7 +53,7 @@ class DiffuseTrainer:
         self._refresh_samples(force=True)
 
     def _make_noisy(self) -> np.ndarray:
-        with torch.no_grad():
+        with torch.inference_mode():
             t_last = torch.full((len(self.x_tensor),), int(self.config.timesteps) - 1, dtype=torch.long, device=self.device)
             noisy = q_sample(self.x_tensor, t_last, self.alphas_bar, torch.randn_like(self.x_tensor))
         return noisy.detach().cpu().numpy().astype(np.float32)
@@ -81,17 +81,21 @@ class DiffuseTrainer:
         cadence = max(1, int(self.config.sample_refresh_every))
         if not force and self._sample_step >= 0 and (self.step_count - self._sample_step) < cadence:
             return
-        model_cpu = TinyDenoiser(hidden_size=int(self.config.hidden_dim), time_dim=int(self.config.time_dim))
-        model_cpu.load_state_dict({key: value.detach().cpu() for key, value in self.model.state_dict().items()})
-        model_cpu.eval()
-        generated, trajectory = sample_points(
-            model_cpu,
-            count=min(int(self.config.sample_count), int(self.config.n_points)),
-            steps=int(self.config.timesteps),
-            schedule=str(self.config.noise_schedule),
-            seed=int(self.config.seed) + int(self.step_count) + 1000,
-            keep_frames=18,
-        )
+        was_training = self.model.training
+        self.model.eval()
+        try:
+            generated, trajectory = sample_points(
+                self.model,
+                count=max(1, min(int(self.config.sample_count), int(self.config.n_points))),
+                steps=max(1, int(self.config.sample_timesteps)),
+                schedule=str(self.config.noise_schedule),
+                seed=int(self.config.seed) + int(self.step_count) + 1000,
+                keep_frames=12,
+                device=self.device,
+            )
+        finally:
+            if was_training:
+                self.model.train()
         self._generated = generated.detach().cpu().numpy().astype(np.float32)
         self._trajectory = trajectory.detach().cpu().numpy().astype(np.float32)
         self._sample_step = int(self.step_count)
@@ -102,8 +106,10 @@ class DiffuseTrainer:
             "demo": "diffuse",
             "dataset": self.config.dataset,
             "step": int(self.step_count),
+            "sample_step": int(self._sample_step),
             "loss": self.last_loss,
             "timesteps": int(self.config.timesteps),
+            "sample_timesteps": int(self.config.sample_timesteps),
         }
 
     def snapshot(self) -> dict[str, object]:

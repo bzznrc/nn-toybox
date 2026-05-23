@@ -11,10 +11,9 @@ DATASETS = DIFFUSION_DATASETS
 
 
 def make_dataset(
-    name: str = "spirals",
+    name: str = "Distributions - Gaussian Mixtures",
     n: int = 1024,
     noise: float = 0.04,
     seed: int = 0,
 ) -> np.ndarray:
     return make_point_cloud(name=name, n=int(n), noise=float(noise), seed=int(seed))
-

@@ -2,18 +2,21 @@
 
 Purpose: show how embeddings turn relationships into geometry.
 
-`embed` trains a tiny embedding table on a hand-written semantic relation corpus:
+`embed` trains a tiny embedding table on hand-written semantic relation corpora covering animals, vehicles, food, and tools:
 
 ```text
-cat has fur
-dog has fur
-bird has wings
-fish swims
-car has wheels
-bus has wheels
-apple is fruit
-banana is fruit
+cat is_a animal
+eagle has wings
+truck used_for carry
+train moves_on rail
+apple tastes sweet
+hammer made_of metal
+spoon used_for eat
 ```
+
+## Clip
+
+![Embed Demo](../../media/embed.gif)
 
 ## In Simple Terms
 
@@ -30,7 +33,7 @@ Token Id -> Embedding Table -> 2D Vector
 Score(left, right) = dot(left_vector, right_vector)
 ```
 
-For the default `tiny_semantics` corpus, there are 15 tokens and `embedding_dim = 2`, so the model has **30 trainable parameters**.
+For the default `Text - Tiny Semantics` corpus, there are 77 tokens and `embedding_dim = 2`, so the model has **154 trainable parameters**.
 
 There are no hidden layers. The whole model is the embedding table. The dot product is trained to be high for positive relation pairs and low for sampled negative pairs.
 
@@ -46,6 +49,7 @@ Defaults:
 
 ```bash
 python -m scripts.view --demo embed
+python -m scripts.view --demo embed --dataset "Text - Big Tiny Semantics"
 python -m scripts.view --demo embed --noise-pairs 4
 python -m scripts.view --demo embed --embedding-dim 3
 
@@ -58,10 +62,11 @@ python -m scripts.capture_demo --demo embed
 - Nearest neighbors for each token.
 - Object/property clusters such as `cat`, `dog`, and `fur`.
 - Category geometry around `apple`, `banana`, and `fruit`.
-- How injected noisy pairs distort the projection.
+- How injected noisy pairs distort the space.
 
 ## Knobs
 
+- `--dataset`: `Text - Tiny Semantics`, `Text - Big Tiny Semantics`
 - `--embedding-dim`
 - `--negative-samples`
 - `--noise-pairs`

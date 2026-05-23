@@ -6,9 +6,14 @@ import math
 
 import numpy as np
 
+from core.datasets import DISTRIBUTION_DATASET_KEYS, dataset_display_names, dataset_key
 
-CLASSIFICATION_DATASETS = ("moons", "circles", "spirals", "xor", "blobs", "checkerboard")
-DIFFUSION_DATASETS = ("rings", "moons", "spirals", "gaussian_mixtures", "checkerboard")
+CLASSIFICATION_DATASET_KEYS = DISTRIBUTION_DATASET_KEYS
+DIFFUSION_DATASET_KEYS = tuple(
+    key for key in DISTRIBUTION_DATASET_KEYS if key in {"gaussian_mixtures", "rings", "moons", "checkerboard", "spirals"}
+)
+CLASSIFICATION_DATASETS = dataset_display_names(CLASSIFICATION_DATASET_KEYS)
+DIFFUSION_DATASETS = dataset_display_names(DIFFUSION_DATASET_KEYS)
 
 
 def _standardize(points: np.ndarray, scale: float = 1.3) -> np.ndarray:
@@ -122,19 +127,23 @@ def make_2d_classification(
     noise: float = 0.08,
     seed: int = 0,
 ) -> tuple[np.ndarray, np.ndarray]:
-    key = str(name).strip().lower()
-    if key == "moons":
-        return make_moons(n, noise, seed)
-    if key == "circles":
-        return make_circles(n, noise, seed)
-    if key == "spirals":
-        return make_spirals(n, noise, seed)
-    if key == "xor":
-        return make_xor(n, noise, seed)
+    key = dataset_key(name)
     if key == "blobs":
         return make_blobs(n, noise, seed)
+    if key == "gaussian_mixtures":
+        return make_gaussian_mixtures(n, noise, seed)
+    if key == "circles":
+        return make_circles(n, noise, seed)
+    if key == "rings":
+        return make_rings(n, noise, seed)
+    if key == "moons":
+        return make_moons(n, noise, seed)
+    if key == "xor":
+        return make_xor(n, noise, seed)
     if key == "checkerboard":
         return make_checkerboard(n, noise, seed)
+    if key == "spirals":
+        return make_spirals(n, noise, seed)
     valid = ", ".join(CLASSIFICATION_DATASETS)
     raise ValueError(f"Unknown classification dataset '{name}'. Valid: {valid}")
 
@@ -145,22 +154,21 @@ def make_point_cloud(
     noise: float = 0.04,
     seed: int = 0,
 ) -> np.ndarray:
-    key = str(name).strip().lower()
+    key = dataset_key(name)
+    if key == "gaussian_mixtures":
+        points, _labels = make_gaussian_mixtures(n, noise, seed)
+        return points
     if key == "rings":
         points, _labels = make_rings(n, noise, seed)
         return points
     if key == "moons":
         points, _labels = make_moons(n, noise, seed)
         return points
-    if key == "spirals":
-        points, _labels = make_spirals(n, noise, seed)
-        return points
-    if key == "gaussian_mixtures":
-        points, _labels = make_gaussian_mixtures(n, noise, seed)
-        return points
     if key == "checkerboard":
         points, _labels = make_checkerboard(n, noise, seed)
         return points
+    if key == "spirals":
+        points, _labels = make_spirals(n, noise, seed)
+        return points
     valid = ", ".join(DIFFUSION_DATASETS)
     raise ValueError(f"Unknown point-cloud dataset '{name}'. Valid: {valid}")
-

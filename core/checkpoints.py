@@ -29,6 +29,7 @@ RunPaths = RunInfo
 
 def _slug(value: str) -> str:
     text = str(value).strip().lower()
+    text = re.sub(r"\s+-\s+", "_", text)
     text = re.sub(r"[^a-z0-9_.-]+", "_", text)
     return text.strip("_") or "run"
 

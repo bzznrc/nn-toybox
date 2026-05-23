@@ -20,19 +20,21 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def _args_for(demo: str, output_dir: str | None) -> list[str]:
     args = ["--demo", demo, "--steps", "2", "--run-name", f"{demo}_smoke", "--save-every", "0"]
     if demo == "grad":
-        args.extend(["--dataset", "moons", "--n-points", "64", "--batch-size", "32"])
+        args.extend(["--dataset", "Distributions - Moons", "--n-points", "64", "--batch-size", "32"])
     if demo == "autoencode":
         args.extend(["--n-samples", "64", "--batch-size", "32"])
     if demo == "diffuse":
         args.extend(
             [
                 "--dataset",
-                "rings",
+                "Distributions - Gaussian Mixtures",
                 "--n-points",
                 "64",
                 "--batch-size",
                 "32",
                 "--timesteps",
+                "4",
+                "--sample-timesteps",
                 "4",
                 "--sample-count",
                 "32",

@@ -10,16 +10,24 @@ from core.checkpoints import RunPaths
 from core.plotting import save_embedding_plot, save_loss_curve
 from core.utils import set_seed
 from demos.embed.config import EmbedConfig
-from demos.embed.data import relation_pairs
+from demos.embed.data import relation_pairs, token_group
 from demos.embed.model import TinyEmbeddingModel
 
 
 def _project_2d(embeddings: np.ndarray) -> np.ndarray:
     centered = embeddings - embeddings.mean(axis=0, keepdims=True)
     if centered.shape[1] == 1:
-        return np.column_stack([centered[:, 0], np.zeros(centered.shape[0], dtype=np.float32)])
-    _u, _s, vt = np.linalg.svd(centered, full_matrices=False)
-    coords = centered @ vt[:2].T
+        coords = np.column_stack([centered[:, 0], np.zeros(centered.shape[0], dtype=np.float32)])
+    elif centered.shape[1] == 2:
+        coords = centered[:, :2]
+    else:
+        _u, _s, vt = np.linalg.svd(centered, full_matrices=False)
+        vt = vt[:2].copy()
+        for axis in range(vt.shape[0]):
+            anchor = int(np.argmax(np.abs(vt[axis])))
+            if vt[axis, anchor] < 0.0:
+                vt[axis] *= -1.0
+        coords = centered @ vt.T
     scale = np.max(np.linalg.norm(coords, axis=1))
     if scale > 0:
         coords = coords / scale
@@ -103,6 +111,7 @@ class EmbedTrainer:
         embeddings = self._embeddings()
         return {
             "tokens": self.tokens,
+            "token_groups": [token_group(token) or "" for token in self.tokens],
             "embeddings": embeddings,
             "coords": _project_2d(embeddings),
             "positive_pairs": self.pos_ids,
@@ -126,6 +135,7 @@ class EmbedTrainer:
             embeddings=embeddings,
             coords=coords,
             tokens=np.asarray(self.tokens),
+            token_groups=np.asarray([token_group(token) or "" for token in self.tokens]),
             positives=np.asarray([(self.tokens[a], self.tokens[b]) for a, b in self.pos_ids.tolist()]),
             losses=np.asarray(self.losses, dtype=np.float32),
         )

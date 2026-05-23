@@ -67,18 +67,20 @@
       "id": "activeDataset",
       "type": "pickString",
       "description": "Dataset",
-      "default": "moons",
+      "default": "Distributions - Gaussian Mixtures",
       "options": [
-        "moons",
-        "circles",
-        "spirals",
-        "xor",
-        "blobs",
-        "checkerboard",
-        "tiny_semantics",
-        "icons",
-        "rings",
-        "gaussian_mixtures"
+        "Distributions - Blobs",
+        "Distributions - Gaussian Mixtures",
+        "Distributions - Circles",
+        "Distributions - Rings",
+        "Distributions - Moons",
+        "Distributions - XOR",
+        "Distributions - Checkerboard",
+        "Distributions - Spiral",
+        "Text - Tiny Semantics",
+        "Text - Big Tiny Semantics",
+        "Images - Icons",
+        "Images - Patterns"
       ]
     }
   ]

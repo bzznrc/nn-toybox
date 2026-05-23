@@ -2,13 +2,17 @@
 
 Purpose: show how a neural network compresses and reconstructs data.
 
-`autoencode` trains a tiny fully connected autoencoder on generated 16x16 icons: circles, squares, triangles, crosses, rings, arrows, and simple glyphs.
+`autoencode` trains a tiny fully connected autoencoder on generated 16x16 image datasets. V1 includes `Images - Icons` and `Images - Patterns`.
+
+## Clip
+
+![Autoencode Demo](../../media/autoencode.gif)
 
 ## In Simple Terms
 
 The model is asked to copy an image, but it has to squeeze the image through a small bottleneck first. That bottleneck is the latent vector.
 
-If the bottleneck is useful, the model keeps the important structure and reconstructs the icon. If it is too small, too noisy, or trained too briefly, the reconstruction loses pixels, blurs shapes, or forgets identity.
+If the bottleneck is useful, the model keeps the important structure and reconstructs the image. If it is too small, too noisy, or trained too briefly, the reconstruction loses pixels, blurs shapes, or forgets identity.
 
 ## Neural Network Shape
 
@@ -40,6 +44,7 @@ Defaults:
 
 ```bash
 python -m scripts.view --demo autoencode
+python -m scripts.view --demo autoencode --dataset "Images - Patterns"
 python -m scripts.view --demo autoencode --latent-dim 2
 python -m scripts.view --demo autoencode --latent-dim 16 --hidden-dim 96
 
@@ -52,10 +57,11 @@ python -m scripts.capture_demo --demo autoencode
 - Which pixels survive reconstruction.
 - Whether shape identity survives the bottleneck.
 - How the latent bars change across samples.
-- Where reconstruction error collects.
+- Whether sample error falls as the reconstruction gets closer to the original.
 
 ## Knobs
 
+- `--dataset`: `Images - Icons`, `Images - Patterns`
 - `--latent-dim`
 - `--hidden-dim`
 - `--image-size`

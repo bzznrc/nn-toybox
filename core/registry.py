@@ -7,6 +7,7 @@ from importlib import import_module
 from typing import Callable
 
 from core.config import CommonConfig
+from core.datasets import dataset_display_name
 from demos.autoencode.config import AutoencodeConfig, add_autoencode_args
 from demos.diffuse.config import DiffuseConfig, add_diffuse_args
 from demos.embed.config import EmbedConfig, add_embed_args
@@ -37,7 +38,7 @@ DEMO_SPECS: dict[str, DemoSpec] = {
         config_cls=GradConfig,
         trainer_path="demos.grad.trainer.GradTrainer",
         renderer_path="demos.grad.renderer.GradRenderer",
-        default_dataset="moons",
+        default_dataset=dataset_display_name("moons"),
         add_cli_args=add_grad_args,
     ),
     "embed": DemoSpec(
@@ -45,7 +46,7 @@ DEMO_SPECS: dict[str, DemoSpec] = {
         config_cls=EmbedConfig,
         trainer_path="demos.embed.trainer.EmbedTrainer",
         renderer_path="demos.embed.renderer.EmbedRenderer",
-        default_dataset="tiny_semantics",
+        default_dataset=dataset_display_name("tiny_semantics"),
         add_cli_args=add_embed_args,
     ),
     "autoencode": DemoSpec(
@@ -53,7 +54,7 @@ DEMO_SPECS: dict[str, DemoSpec] = {
         config_cls=AutoencodeConfig,
         trainer_path="demos.autoencode.trainer.AutoencodeTrainer",
         renderer_path="demos.autoencode.renderer.AutoencodeRenderer",
-        default_dataset="icons",
+        default_dataset=dataset_display_name("icons"),
         add_cli_args=add_autoencode_args,
     ),
     "diffuse": DemoSpec(
@@ -61,7 +62,7 @@ DEMO_SPECS: dict[str, DemoSpec] = {
         config_cls=DiffuseConfig,
         trainer_path="demos.diffuse.trainer.DiffuseTrainer",
         renderer_path="demos.diffuse.renderer.DiffuseRenderer",
-        default_dataset="rings",
+        default_dataset=dataset_display_name("gaussian_mixtures"),
         add_cli_args=add_diffuse_args,
     ),
 }

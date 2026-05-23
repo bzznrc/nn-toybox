@@ -1,4 +1,4 @@
-"""Generated 16x16 icon dataset for autoencoding."""
+"""Generated 16x16 image datasets for autoencoding."""
 
 from __future__ import annotations
 
@@ -6,6 +6,16 @@ import numpy as np
 
 
 SHAPE_NAMES = ("circle", "square", "triangle", "cross", "ring", "arrow", "glyph")
+PATTERN_NAMES = (
+    "checkerboard",
+    "vertical_stripes",
+    "horizontal_stripes",
+    "diagonal_stripes",
+    "reverse_diagonal_stripes",
+    "grid",
+    "dots",
+    "border",
+)
 
 
 def _grid(size: int) -> tuple[np.ndarray, np.ndarray]:
@@ -59,8 +69,8 @@ def _draw_glyph(mask: np.ndarray, digit: int, cx: float, cy: float, scale: float
 
 def _render_icon(shape: str, size: int, rng: np.random.Generator) -> np.ndarray:
     xx, yy = _grid(size)
-    cx = (size - 1) * 0.5 + rng.uniform(-1.0, 1.0)
-    cy = (size - 1) * 0.5 + rng.uniform(-1.0, 1.0)
+    cx = (size - 1) * 0.5
+    cy = (size - 1) * 0.5
     radius = rng.uniform(size * 0.24, size * 0.34)
     thickness = rng.uniform(1.2, 2.1)
     mask = np.zeros((size, size), dtype=bool)
@@ -95,10 +105,49 @@ def _render_icon(shape: str, size: int, rng: np.random.Generator) -> np.ndarray:
     else:
         raise ValueError(f"Unsupported shape '{shape}'.")
 
-    image = mask.astype(np.float32)
-    if rng.random() < 0.35:
-        image = np.roll(image, shift=int(rng.integers(-1, 2)), axis=int(rng.integers(0, 2)))
-    return image
+    return mask.astype(np.float32)
+
+
+def _render_pattern(pattern: str, size: int, rng: np.random.Generator) -> np.ndarray:
+    xx, yy = _grid(size)
+    period = int(rng.integers(3, 6))
+    stripe_width = max(1, period // 2)
+
+    if pattern == "checkerboard":
+        block = int(rng.integers(2, 5))
+        image = (((xx // block) + (yy // block)) % 2 == 0)
+    elif pattern == "vertical_stripes":
+        image = (xx % period) < stripe_width
+    elif pattern == "horizontal_stripes":
+        image = (yy % period) < stripe_width
+    elif pattern == "diagonal_stripes":
+        image = ((xx + yy) % period) < stripe_width
+    elif pattern == "reverse_diagonal_stripes":
+        image = ((xx - yy) % period) < stripe_width
+    elif pattern == "grid":
+        spacing = int(rng.integers(4, 7))
+        image = ((xx % spacing) == 0) | ((yy % spacing) == 0)
+    elif pattern == "dots":
+        spacing = int(rng.integers(4, 6))
+        radius = rng.uniform(0.9, 1.4)
+        cx = (np.round(xx / spacing) * spacing).astype(np.float32)
+        cy = (np.round(yy / spacing) * spacing).astype(np.float32)
+        image = (xx - cx) ** 2 + (yy - cy) ** 2 <= radius**2
+    elif pattern == "border":
+        thickness = int(rng.integers(1, 3))
+        image = (xx < thickness) | (yy < thickness) | (xx >= size - thickness) | (yy >= size - thickness)
+    else:
+        raise ValueError(f"Unsupported pattern '{pattern}'.")
+
+    return image.astype(np.float32)
+
+
+def _apply_foreground_noise(image: np.ndarray, noise: float, seed: int) -> np.ndarray:
+    if float(noise) <= 0:
+        return image
+    noise_rng = np.random.default_rng(int(seed))
+    jitter = noise_rng.normal(0.0, float(noise), size=image.shape).astype(np.float32)
+    return image + jitter * image
 
 
 def make_icons(
@@ -109,11 +158,31 @@ def make_icons(
 ) -> tuple[np.ndarray, np.ndarray, tuple[str, ...]]:
     rng = np.random.default_rng(int(seed))
     labels = rng.integers(0, len(SHAPE_NAMES), size=int(n), endpoint=False)
+    shape_seeds = rng.integers(0, np.iinfo(np.uint32).max, size=int(n), dtype=np.uint32)
+    noise_seeds = rng.integers(0, np.iinfo(np.uint32).max, size=int(n), dtype=np.uint32)
     images = np.zeros((int(n), 1, int(size), int(size)), dtype=np.float32)
     for idx, label in enumerate(labels):
-        image = _render_icon(SHAPE_NAMES[int(label)], int(size), rng)
-        if float(noise) > 0:
-            image = image + rng.normal(0.0, float(noise), size=image.shape).astype(np.float32)
+        shape_rng = np.random.default_rng(int(shape_seeds[idx]))
+        image = _render_icon(SHAPE_NAMES[int(label)], int(size), shape_rng)
+        image = _apply_foreground_noise(image, float(noise), int(noise_seeds[idx]))
         images[idx, 0] = np.clip(image, 0.0, 1.0)
     return images.astype(np.float32), labels.astype(np.int64), SHAPE_NAMES
 
+
+def make_patterns(
+    n: int = 512,
+    size: int = 16,
+    seed: int = 0,
+    noise: float = 0.02,
+) -> tuple[np.ndarray, np.ndarray, tuple[str, ...]]:
+    rng = np.random.default_rng(int(seed))
+    labels = rng.integers(0, len(PATTERN_NAMES), size=int(n), endpoint=False)
+    pattern_seeds = rng.integers(0, np.iinfo(np.uint32).max, size=int(n), dtype=np.uint32)
+    noise_seeds = rng.integers(0, np.iinfo(np.uint32).max, size=int(n), dtype=np.uint32)
+    images = np.zeros((int(n), 1, int(size), int(size)), dtype=np.float32)
+    for idx, label in enumerate(labels):
+        pattern_rng = np.random.default_rng(int(pattern_seeds[idx]))
+        image = _render_pattern(PATTERN_NAMES[int(label)], int(size), pattern_rng)
+        image = _apply_foreground_noise(image, float(noise), int(noise_seeds[idx]))
+        images[idx, 0] = np.clip(image, 0.0, 1.0)
+    return images.astype(np.float32), labels.astype(np.int64), PATTERN_NAMES

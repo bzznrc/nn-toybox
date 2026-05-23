@@ -11,4 +11,4 @@ Each entry asks for:
 1. `Demo`
 2. `Dataset`
 
-Run names and capture filenames are automatic. The full dataset list is shared across demos; choose a dataset that belongs to the selected demo.
+Run names and capture filenames are automatic. The full dataset list is shared across demos; choose a typed dataset such as `Distributions - Moons`, `Text - Tiny Semantics`, or `Images - Icons` that belongs to the selected demo.

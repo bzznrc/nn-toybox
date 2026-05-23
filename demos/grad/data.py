@@ -11,10 +11,9 @@ DATASETS = CLASSIFICATION_DATASETS
 
 
 def make_dataset(
-    name: str = "moons",
+    name: str = "Distributions - Moons",
     n: int = 512,
     noise: float = 0.08,
     seed: int = 0,
 ) -> tuple[np.ndarray, np.ndarray]:
     return make_2d_classification(name=name, n=int(n), noise=float(noise), seed=int(seed))
-

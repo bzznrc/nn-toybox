@@ -2,28 +2,16 @@
 
 from __future__ import annotations
 
-import arcade
 import numpy as np
 
-from core.arcade_style import COLOR_AQUA, COLOR_CORAL, COLOR_LEAF_GREEN
-from core.arcade_view import draw_panel_outline, draw_pixel_image, with_alpha
+from core.arcade_style import COLOR_AQUA, COLOR_CORAL
+from core.arcade_view import draw_pixel_image, draw_vertical_bars, split_columns
 from demos.autoencode.config import AutoencodeConfig
 
 
 class AutoencodeRenderer:
     def __init__(self, config: AutoencodeConfig) -> None:
         self.config = config
-
-    @staticmethod
-    def _split_three(rect: tuple[float, float, float, float]) -> tuple[tuple[float, float, float, float], ...]:
-        left, bottom, width, height = rect
-        gap = 14.0
-        cell_width = (width - 2.0 * gap) / 3.0
-        return (
-            (left, bottom, cell_width, height),
-            (left + cell_width + gap, bottom, cell_width, height),
-            (left + 2.0 * (cell_width + gap), bottom, cell_width, height),
-        )
 
     @staticmethod
     def _draw_image_in_rect(image: np.ndarray, rect: tuple[float, float, float, float], color: tuple[int, int, int]) -> None:
@@ -44,9 +32,7 @@ class AutoencodeRenderer:
         layout = window.layout(secondary=True)
         main_rect = layout.main
         latent_rect = layout.secondary if layout.secondary is not None else layout.text
-        image_rects = self._split_three(main_rect)
-        for rect in (*image_rects, latent_rect):
-            draw_panel_outline(rect, "")
+        image_rects = split_columns(main_rect, 2)
         metrics = dict(snapshot.get("metrics", {}))
         images = np.asarray(snapshot["images"], dtype=np.float32)
         recons = np.asarray(snapshot["recons"], dtype=np.float32)
@@ -54,21 +40,10 @@ class AutoencodeRenderer:
         idx = (int(metrics.get("step", 0)) // 20) % max(1, len(images))
         image = images[idx]
         recon = recons[idx]
-        err = np.abs(image - recon)
         self._draw_image_in_rect(image, image_rects[0], COLOR_AQUA)
         self._draw_image_in_rect(recon, image_rects[1], COLOR_CORAL)
-        self._draw_image_in_rect(err / max(1e-6, float(err.max())), image_rects[2], COLOR_LEAF_GREEN)
         latent = latents[idx]
-        left, bottom, width, height = latent_rect
-        if latent.size:
-            lo = float(np.min(latent))
-            hi = float(np.max(latent))
-            span = max(1e-6, hi - lo)
-            bar_w = width / latent.size
-            for j, value in enumerate(latent):
-                ratio = (float(value) - lo) / span
-                bar_h = 8.0 + ratio * (height - 24.0)
-                arcade.draw_lbwh_rectangle_filled(left + j * bar_w + 3, bottom + 8, max(2, bar_w - 6), bar_h, with_alpha(COLOR_AQUA, 220))
+        draw_vertical_bars(latent, latent_rect)
         labels = np.asarray(snapshot["labels"], dtype=np.int64)
         names = [str(name) for name in snapshot["names"]]
         label = int(labels[idx]) if labels.size else 0

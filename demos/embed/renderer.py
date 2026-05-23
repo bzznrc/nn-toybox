@@ -2,62 +2,156 @@
 
 from __future__ import annotations
 
-import arcade
 import numpy as np
 
-from core.arcade_style import COLOR_AQUA, COLOR_CORAL, COLOR_FOG_GRAY, COLOR_LIGHT_NEUTRAL, COLOR_SLATE_GRAY
-from core.arcade_view import draw_panel_outline, with_alpha, world_to_panel
+import arcade
+
+from core.arcade_style import (
+    COLOR_AQUA,
+    COLOR_BLUE,
+    COLOR_BRICK_RED,
+    COLOR_CORAL,
+    COLOR_DARK_NEUTRAL,
+    COLOR_DEEP_PURPLE,
+    COLOR_DEEP_TEAL,
+    COLOR_FOG_GRAY,
+    COLOR_LIGHT_NEUTRAL,
+    COLOR_NAVY,
+    COLOR_PURPLE,
+    COLOR_SLATE_GRAY,
+    TOYBOX_CHART_FILL_ALPHA,
+    TOYBOX_CHART_TRACK_ALPHA,
+)
+from core.arcade_view import clamp_point_to_rect, draw_diamond_marker, fit_points_to_panel, with_alpha
 from demos.embed.config import EmbedConfig
 
 
 class EmbedRenderer:
+    GROUP_COLOR_PAIRS = {
+        "animals": (COLOR_AQUA, COLOR_DEEP_TEAL),
+        "vehicles": (COLOR_CORAL, COLOR_BRICK_RED),
+        "food": (COLOR_BLUE, COLOR_NAVY),
+        "tools": (COLOR_PURPLE, COLOR_DEEP_PURPLE),
+    }
+
     def __init__(self, config: EmbedConfig) -> None:
         self.config = config
+        self.mouse_xy: tuple[float, float] | None = None
+        self.hover_radius = 14.0
+        self.selected_index = 0
+
+    def on_mouse_motion(self, x: int, y: int, dx: int, dy: int, *, window: object) -> bool:
+        del dx, dy, window
+        self.mouse_xy = (float(x), float(y))
+        return False
 
     @staticmethod
-    def _nearest(embeddings: np.ndarray, selected: int) -> list[tuple[float, int]]:
-        vector = embeddings[selected]
-        denom = np.linalg.norm(embeddings, axis=1) * max(1e-6, float(np.linalg.norm(vector)))
-        sim = (embeddings @ vector) / np.maximum(denom, 1e-6)
-        order = np.argsort(-sim)
-        return [(float(sim[int(idx)]), int(idx)) for idx in order if int(idx) != selected][:5]
+    def _nearest(coords: np.ndarray, selected: int, *, count: int = 5) -> list[tuple[float, int]]:
+        delta = np.asarray(coords, dtype=np.float32) - np.asarray(coords[int(selected)], dtype=np.float32)
+        distances = np.linalg.norm(delta, axis=1)
+        order = [int(idx) for idx in np.argsort(distances) if int(idx) != int(selected)]
+        if not order:
+            return []
+        local = order[: max(1, int(count) + 1)]
+        radius = float(distances[local[-1]])
+        radius = max(radius, 1e-6)
+        nearest = []
+        for idx in order[: int(count)]:
+            score = 1.0 - float(distances[idx]) / radius
+            nearest.append((max(0.05, min(1.0, score)), int(idx)))
+        return nearest
 
     def draw(self, snapshot: dict[str, object], window: object) -> None:
         layout = window.layout(secondary=True)
         main_rect = layout.main
         secondary_rect = layout.secondary if layout.secondary is not None else layout.text
-        draw_panel_outline(main_rect, "")
-        draw_panel_outline(secondary_rect, "")
         tokens = [str(token) for token in snapshot["tokens"]]
-        embeddings = np.asarray(snapshot["embeddings"], dtype=np.float32)
+        groups = [str(group) for group in snapshot.get("token_groups", [""] * len(tokens))]
         coords = np.asarray(snapshot["coords"], dtype=np.float32)
-        metrics = dict(snapshot.get("metrics", {}))
-        selected = (int(metrics.get("step", 0)) // 25) % max(1, len(tokens))
-        xy = world_to_panel(coords, main_rect, xlim=(-1.15, 1.15), ylim=(-1.15, 1.15))
+        xy = fit_points_to_panel(coords, main_rect, fill=0.95)
+        hovered = self._hovered_index(xy, main_rect)
+        if hovered is not None:
+            self.selected_index = int(hovered)
+        selected = max(0, min(int(self.selected_index), len(tokens) - 1))
+        nearest: list[tuple[float, int]] = []
         selected_xy = xy[selected]
-        nearest = self._nearest(embeddings, selected)
-        for sim, idx in nearest[:3]:
-            alpha = int(60 + max(0.0, sim) * 130)
+        nearest = self._nearest(coords, selected)
+        for score, idx in nearest[:3]:
+            alpha = int(55 + max(0.0, score) * 150)
             arcade.draw_line(selected_xy[0], selected_xy[1], xy[idx, 0], xy[idx, 1], with_alpha(COLOR_FOG_GRAY, alpha), 1.5)
-        for idx, (token, point) in enumerate(zip(tokens, xy)):
+        for idx, point in enumerate(xy):
             is_selected = idx == selected
-            color = COLOR_CORAL if is_selected else COLOR_AQUA
-            radius = 9 if is_selected else 5
-            arcade.draw_circle_filled(float(point[0]), float(point[1]), radius, color)
-            outline = COLOR_LIGHT_NEUTRAL if is_selected else with_alpha(COLOR_SLATE_GRAY, 120)
-            arcade.draw_circle_outline(float(point[0]), float(point[1]), radius + 2, outline, 1.0)
+            outer, inner = self.GROUP_COLOR_PAIRS.get(groups[idx], (COLOR_SLATE_GRAY, COLOR_DARK_NEUTRAL))
+            if is_selected:
+                arcade.draw_polygon_filled(
+                    [
+                        (float(point[0]), float(point[1]) + 10.0),
+                        (float(point[0]) + 10.0, float(point[1])),
+                        (float(point[0]), float(point[1]) - 10.0),
+                        (float(point[0]) - 10.0, float(point[1])),
+                    ],
+                    with_alpha(COLOR_FOG_GRAY, 42),
+                )
+            draw_diamond_marker(
+                float(point[0]),
+                float(point[1]),
+                outer_color=outer,
+                inner_color=inner,
+                marker="regular",
+                alpha=245 if groups[idx] else 175,
+            )
+        label_width = window.text_cache.measure_width(tokens[selected], font_size=12, anchor_y="center")
+        label_x, label_y = clamp_point_to_rect(
+            float(selected_xy[0]) + 12.0,
+            float(selected_xy[1]) + 12.0,
+            (
+                main_rect[0],
+                main_rect[1] + 6.0,
+                max(1.0, main_rect[2] - label_width),
+                max(1.0, main_rect[3] - 12.0),
+            ),
+        )
+        window.text_cache.draw(
+            tokens[selected],
+            label_x,
+            label_y,
+            color=COLOR_FOG_GRAY,
+            font_size=12,
+            anchor_y="center",
+        )
 
         left, bottom, width, height = secondary_rect
         bar_gap = 8.0
         bar_count = max(1, len(nearest))
         bar_height = max(4.0, (height - bar_gap * (bar_count + 1)) / bar_count)
-        for row, (sim, _idx) in enumerate(nearest):
+        for row, (score, idx) in enumerate(nearest):
             y = bottom + height - bar_gap - (row + 1) * bar_height - row * bar_gap
-            fill_width = max(2.0, width * max(0.0, min(1.0, (sim + 1.0) * 0.5)))
-            arcade.draw_lbwh_rectangle_filled(left, y, width, bar_height, with_alpha(COLOR_SLATE_GRAY, 70))
-            arcade.draw_lbwh_rectangle_filled(left, y, fill_width, bar_height, with_alpha(COLOR_AQUA, 210))
+            fill_width = max(2.0, width * max(0.0, min(1.0, score)))
+            arcade.draw_lbwh_rectangle_filled(left, y, width, bar_height, with_alpha(COLOR_SLATE_GRAY, TOYBOX_CHART_TRACK_ALPHA))
+            arcade.draw_lbwh_rectangle_filled(left, y, fill_width, bar_height, with_alpha(COLOR_SLATE_GRAY, TOYBOX_CHART_FILL_ALPHA))
+            window.text_cache.draw(
+                tokens[idx],
+                left + 8.0,
+                y + bar_height * 0.5,
+                color=COLOR_LIGHT_NEUTRAL,
+                font_size=11,
+                anchor_y="center",
+                bold=True,
+            )
 
         extra = [f"selected: {tokens[selected]}"]
-        for sim, idx in nearest:
-            extra.append(f"nearest: {tokens[idx]} ({sim:.2f})")
         window.draw_info(snapshot, secondary=True, extra=tuple(extra))
+
+    def _hovered_index(self, xy: np.ndarray, rect: tuple[float, float, float, float]) -> int | None:
+        if self.mouse_xy is None or xy.size == 0:
+            return None
+        mx, my = self.mouse_xy
+        left, bottom, width, height = rect
+        if not (left <= mx <= left + width and bottom <= my <= bottom + height):
+            return None
+        delta = xy - np.asarray([[mx, my]], dtype=np.float32)
+        dist2 = np.sum(delta * delta, axis=1)
+        idx = int(np.argmin(dist2))
+        if float(dist2[idx]) > self.hover_radius * self.hover_radius:
+            return None
+        return idx

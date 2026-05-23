@@ -4,6 +4,10 @@ Purpose: show how a neural network learns a decision boundary.
 
 `grad` trains a tiny classifier on generated 2D point clouds. The live view shows the data points, the current decision boundary, and a loss curve as the model updates.
 
+## Clip
+
+![Grad Demo](../../media/grad.gif)
+
 ## In Simple Terms
 
 Each point has an `x` and `y` position plus a class label. The network sees batches of points, guesses their class, compares the guess with the real label, and nudges its weights to make the next guess better.
@@ -41,12 +45,12 @@ Defaults:
 ## Commands
 
 ```bash
-python -m scripts.view --demo grad --dataset moons
-python -m scripts.view --demo grad --dataset spirals --hidden-dim 64 --activation tanh
-python -m scripts.view --demo grad --dataset checkerboard --lr 0.03 --optimizer sgd
+python -m scripts.view --demo grad --dataset "Distributions - Moons"
+python -m scripts.view --demo grad --dataset "Distributions - Spiral" --hidden-dim 64 --activation tanh
+python -m scripts.view --demo grad --dataset "Distributions - Checkerboard" --lr 0.03 --optimizer sgd
 
-python -m scripts.train --demo grad --dataset moons --steps 1000
-python -m scripts.capture_demo --demo grad --dataset moons
+python -m scripts.train --demo grad --dataset "Distributions - Moons" --steps 1000
+python -m scripts.capture_demo --demo grad --dataset "Distributions - Moons"
 ```
 
 ## Look For
@@ -58,7 +62,7 @@ python -m scripts.capture_demo --demo grad --dataset moons
 
 ## Knobs
 
-- `--dataset`: `moons`, `circles`, `spirals`, `xor`, `blobs`, `checkerboard`
+- `--dataset`: `Distributions - Blobs`, `Distributions - Gaussian Mixtures`, `Distributions - Circles`, `Distributions - Rings`, `Distributions - Moons`, `Distributions - XOR`, `Distributions - Checkerboard`, `Distributions - Spiral`
 - `--hidden-dim`
 - `--layers`
 - `--activation`
@@ -71,7 +75,7 @@ python -m scripts.capture_demo --demo grad --dataset moons
 ## Failure Cases Worth Trying
 
 ```bash
-python -m scripts.view --demo grad --dataset spirals --hidden-dim 8
-python -m scripts.view --demo grad --dataset moons --lr 1.0
-python -m scripts.view --demo grad --dataset checkerboard --layers 1
+python -m scripts.view --demo grad --dataset "Distributions - Spiral" --hidden-dim 8
+python -m scripts.view --demo grad --dataset "Distributions - Moons" --lr 1.0
+python -m scripts.view --demo grad --dataset "Distributions - Checkerboard" --layers 1
 ```

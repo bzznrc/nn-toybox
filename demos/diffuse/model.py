@@ -51,7 +51,7 @@ def q_sample(x0: torch.Tensor, t_idx: torch.Tensor, alphas_bar: torch.Tensor, no
     return torch.sqrt(a) * x0 + torch.sqrt(1.0 - a) * noise
 
 
-@torch.no_grad()
+@torch.inference_mode()
 def sample_points(
     model: TinyDenoiser,
     count: int,
@@ -59,22 +59,24 @@ def sample_points(
     schedule: str = "linear",
     seed: int = 0,
     keep_frames: int = 18,
+    device: torch.device | str | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    generator = torch.Generator(device="cpu").manual_seed(int(seed))
-    betas, alphas, alphas_bar = make_schedule(steps, schedule)
-    x = torch.randn((int(count), 2), generator=generator)
+    sample_device = torch.device(device) if device is not None else next(model.parameters()).device
+    generator = torch.Generator(device=sample_device).manual_seed(int(seed))
+    betas, alphas, alphas_bar = (tensor.to(sample_device) for tensor in make_schedule(steps, schedule))
+    x = torch.randn((int(count), 2), generator=generator, device=sample_device)
     frames: list[torch.Tensor] = [x.clone()]
     keep_every = max(1, int(steps) // max(1, int(keep_frames) - 1))
 
     for idx in reversed(range(int(steps))):
-        t = torch.full((int(count),), float(idx) / max(1, int(steps) - 1))
+        t = torch.full((int(count),), float(idx) / max(1, int(steps) - 1), device=sample_device)
         eps = model(x, t)
         beta = betas[idx]
         alpha = alphas[idx]
         alpha_bar = alphas_bar[idx]
         mean = (x - beta / torch.sqrt(1.0 - alpha_bar) * eps) / torch.sqrt(alpha)
         if idx > 0:
-            z = torch.randn(x.shape, generator=generator)
+            z = torch.randn(x.shape, generator=generator, device=sample_device)
             x = mean + torch.sqrt(beta) * z
         else:
             x = mean
@@ -85,4 +87,3 @@ def sample_points(
 
 def build_model(config: dict[str, object]) -> TinyDenoiser:
     return TinyDenoiser(hidden_size=int(config.get("hidden_size", 64)), time_dim=int(config.get("time_dim", 16)))
-

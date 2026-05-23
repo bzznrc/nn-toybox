@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime
 import os
 from pathlib import Path
 from typing import Sequence
@@ -34,8 +33,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 
 def _output_path(demo: str) -> Path:
     MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-    return MEDIA_ROOT / f"{demo}_{timestamp}.gif"
+    return MEDIA_ROOT / f"{demo}.gif"
 
 
 def _capture_frame(window: arcade.Window) -> Image.Image:

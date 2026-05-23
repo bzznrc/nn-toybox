@@ -36,9 +36,11 @@ from core.arcade_style import (
     GAME_TITLE_FONT_NAME,
     GAME_UI_FONT_NAME,
     INTER_FONT_NAME,
+    POINT_MARKERS,
     screen_height,
     screen_width,
 )
+from core.datasets import dataset_display_name
 from core.shared_config import PLAYFIELD_HEIGHT, SCREEN_HEIGHT, SCREEN_WIDTH, SHOW_FPS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -137,8 +139,11 @@ def config_from_args(config_cls: type[ConfigT], args: argparse.Namespace, *, def
         if value is not None:
             payload[field.name] = value
     payload["demo"] = str(args.demo)
-    payload["dataset"] = str(args.dataset or default_dataset)
+    payload["dataset"] = dataset_display_name(args.dataset or default_dataset)
     payload["device"] = normalize_device(str(payload.get("device", "cpu")))
+    resolver = getattr(config_cls, "resolve_payload", None)
+    if callable(resolver):
+        payload = resolver(payload)
     if bool(payload.get("smoke", False)):
         payload["steps"] = min(int(payload.get("steps", 1000)), 5)
         payload["save_every"] = max(1, min(int(payload.get("save_every", 250)), int(payload["steps"])))
