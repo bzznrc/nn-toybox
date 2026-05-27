@@ -8,6 +8,7 @@ from torch import nn
 
 from core.checkpoints import RunPaths
 from core.plotting import save_loss_curve
+from core.torch_utils import torch_device
 from core.utils import set_seed
 from demos.attend.config import AttendConfig
 from demos.attend.data import (
@@ -23,16 +24,10 @@ from demos.attend.data import (
 from demos.attend.model import AgreementSelfAttentionModel
 
 
-def _torch_device(name: str) -> torch.device:
-    if str(name).lower() == "cuda" and torch.cuda.is_available():
-        return torch.device("cuda")
-    return torch.device("cpu")
-
-
 class AttendTrainer:
     def __init__(self, config: AttendConfig) -> None:
         self.config = config
-        self.device = _torch_device(config.device)
+        self.device = torch_device(config.device)
         self.reset(int(config.seed))
 
     def reset(self, seed: int | None = None) -> None:

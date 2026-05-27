@@ -11,16 +11,11 @@ from torch import nn
 from core.checkpoints import RunPaths
 from core.config import PROJECT_ROOT
 from core.plotting import save_loss_curve
+from core.torch_utils import torch_device
 from core.utils import set_seed
 from demos.conv.config import ConvConfig
 from demos.conv.model import TinyConvNet
 from nn_toybox.shared.digits8 import Digits8Browser, load_digits8_split
-
-
-def _torch_device(name: str) -> torch.device:
-    if str(name).lower() == "cuda" and torch.cuda.is_available():
-        return torch.device("cuda")
-    return torch.device("cpu")
 
 
 def _relative_path(path_text: str) -> Path:
@@ -31,7 +26,7 @@ def _relative_path(path_text: str) -> Path:
 class ConvTrainer:
     def __init__(self, config: ConvConfig) -> None:
         self.config = config
-        self.device = _torch_device(config.device)
+        self.device = torch_device(config.device)
         self.reset(int(config.seed))
 
     def reset(self, seed: int | None = None) -> None:

@@ -5,28 +5,13 @@ from __future__ import annotations
 import numpy as np
 
 from core.arcade_style import COLOR_AQUA, COLOR_CORAL
-from core.arcade_view import clipped_rect, draw_pixel_image, draw_vertical_bars, split_columns
+from core.arcade_view import clipped_rect, draw_pixel_image_in_rect, draw_vertical_bars, split_columns
 from demos.encode.config import EncodeConfig
 
 
 class EncodeRenderer:
     def __init__(self, config: EncodeConfig) -> None:
         self.config = config
-
-    @staticmethod
-    def _draw_image_in_rect(image: np.ndarray, rect: tuple[float, float, float, float], color: tuple[int, int, int]) -> None:
-        left, bottom, width, height = rect
-        img = np.asarray(image, dtype=np.float32)
-        size = int(img.shape[-1])
-        scale = max(1.0, min((width - 20.0) / max(1, size), (height - 20.0) / max(1, size)))
-        draw_width = size * scale
-        draw_pixel_image(
-            img,
-            left + (width - draw_width) * 0.5,
-            bottom + (height - draw_width) * 0.5,
-            scale=scale,
-            on_color=color,
-        )
 
     def draw(self, snapshot: dict[str, object], window: object) -> None:
         layout = window.layout(secondary=True)
@@ -41,8 +26,8 @@ class EncodeRenderer:
         image = images[idx]
         recon = recons[idx]
         with clipped_rect(main_rect):
-            self._draw_image_in_rect(image, image_rects[0], COLOR_AQUA)
-            self._draw_image_in_rect(recon, image_rects[1], COLOR_CORAL)
+            draw_pixel_image_in_rect(image, image_rects[0], on_color=COLOR_AQUA)
+            draw_pixel_image_in_rect(recon, image_rects[1], on_color=COLOR_CORAL)
         latent = latents[idx]
         draw_vertical_bars(latent, latent_rect)
         labels = np.asarray(snapshot["labels"], dtype=np.int64)

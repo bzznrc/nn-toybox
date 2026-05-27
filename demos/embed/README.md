@@ -48,12 +48,12 @@ Defaults:
 ## Commands
 
 ```bash
-python -m scripts.view --demo embed
-python -m scripts.view --demo embed --dataset "Text - Big Tiny Semantics"
-python -m scripts.view --demo embed --noise-pairs 4
-python -m scripts.view --demo embed --embedding-dim 3
+python -m nn_toybox.display --demo embed
+python -m nn_toybox.display --demo embed --dataset "Text - Big Tiny Semantics"
+python -m nn_toybox.display --demo embed --noise-pairs 4
+python -m nn_toybox.display --demo embed --embedding-dim 3
 
-python -m scripts.train --demo embed --steps 1000
+python -m nn_toybox.run --demo embed --steps 1000
 python -m scripts.capture_demo --demo embed
 ```
 
@@ -76,7 +76,7 @@ python -m scripts.capture_demo --demo embed
 ## Failure Cases Worth Trying
 
 ```bash
-python -m scripts.view --demo embed --noise-pairs 8
-python -m scripts.view --demo embed --embedding-dim 1
-python -m scripts.train --demo embed --steps 20
+python -m nn_toybox.display --demo embed --noise-pairs 8
+python -m nn_toybox.display --demo embed --embedding-dim 1
+python -m nn_toybox.run --demo embed --steps 20
 ```

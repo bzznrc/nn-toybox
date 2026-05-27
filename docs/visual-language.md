@@ -113,5 +113,6 @@ When adding or changing a demo:
 - Keep the main canvas to one coherent visual.
 - Use the secondary region for one small supporting visual.
 - Use the text region for state, metrics, and labels only.
+- Use `draw_pixel_image_in_rect(...)` for fitted pixel-image previews.
 - Prefer existing colors and markers before adding anything new.
 - Add new core visual primitives only when multiple demos will benefit from them.

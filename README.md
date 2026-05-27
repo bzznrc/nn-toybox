@@ -9,10 +9,10 @@ Working slogan: **Learning -> Geometry -> Compression -> Generation**
 ## Clips
 
 <p align="center">
-  <img src="media/grad.gif" alt="Grad demo clip" width="50%" /><img src="media/embed.gif" alt="Embed demo clip" width="50%" />
+  <img src="media/grad.gif" alt="Grad demo clip" width="24%" /><img src="media/embed.gif" alt="Embed demo clip" width="24%" /><img src="media/encode.gif" alt="Encode demo clip" width="24%" /><img src="media/diffuse.gif" alt="Diffuse demo clip" width="24%" />
 </p>
 <p align="center">
-  <img src="media/encode.gif" alt="Encode demo clip" width="50%" /><img src="media/diffuse.gif" alt="Diffuse demo clip" width="50%" />
+  <img src="media/trace.gif" alt="Trace demo clip" width="24%" /><img src="media/conv.gif" alt="Conv demo clip" width="24%" /><img src="media/attend.gif" alt="Attend demo clip" width="24%" /><img src="media/optim.gif" alt="Optim demo clip" width="24%" />
 </p>
 
 ## Quick Start
@@ -51,7 +51,7 @@ python -m nn_toybox.run --demo optim --steps 500
 - Arcade is UI only.
 - PyTorch and NumPy own model, data, and training.
 - A small registry connects each demo config, trainer, and renderer.
-- CI uses the shared `train` and trainer paths, not viewer checkpoints.
+- CI uses the shared `run` and trainer paths, not viewer checkpoints.
 
 Common flags work across demos:
 
@@ -117,14 +117,14 @@ Headless runs write to `runs/<demo>/<run-name>/`:
 - `checkpoint.pt`: final model checkpoint
 - `artifacts/`: NumPy exports and static preview images when implemented
 
-The primary workflow is live training through `view`, not opening a saved run. Checkpoint loading can be added later without becoming the main path.
+The primary workflow is live training through `display`, not opening a saved run. Checkpoint loading can be added later without becoming the main path.
 
 ## Repo Layout
 
 - `nn_toybox/run.py`: shared headless entrypoint wrapper
 - `nn_toybox/display.py`: shared Arcade live-training entrypoint wrapper
-- `scripts/train.py`: original shared headless entrypoint
-- `scripts/view.py`: original shared Arcade live-training entrypoint
+- `scripts/train.py`: compatibility wrapper for the shared headless entrypoint
+- `scripts/view.py`: compatibility wrapper for the shared Arcade display entrypoint
 - `core/config.py`: shared config/dataclass/CLI helpers
 - `core/registry.py`: tiny explicit demo registry
 - `demos/<name>/`: per-demo `config`, `trainer`, `renderer`, `model`, and `data`

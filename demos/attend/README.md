@@ -2,6 +2,10 @@
 
 Tiny self-attention on synthetic subject-verb agreement sentences.
 
+Default display: `python -m nn_toybox.display --demo attend`
+
+Headless run: `python -m nn_toybox.run --demo attend --steps 1000`
+
 Example:
 
 ```text

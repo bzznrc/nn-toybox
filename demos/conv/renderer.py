@@ -11,7 +11,7 @@ from core.arcade_style import (
     COLOR_LIGHT_NEUTRAL,
     COLOR_SLATE_GRAY,
 )
-from core.arcade_view import clipped_rect, draw_pixel_image
+from core.arcade_view import clipped_rect, draw_pixel_image_in_rect
 from demos.conv.config import ConvConfig
 
 
@@ -52,19 +52,6 @@ class ConvRenderer:
         hi = float(np.max(arr))
         return ((arr - lo) / max(1e-6, hi - lo)).astype(np.float32)
 
-    def _draw_image(self, image: np.ndarray, rect: tuple[float, float, float, float], color: tuple[int, int, int]) -> None:
-        left, bottom, width, height = rect
-        scale = max(1.0, min(width, height) / 8.0)
-        draw_pixel_image(
-            image,
-            left + (width - scale * 8.0) * 0.5,
-            bottom + (height - scale * 8.0) * 0.5,
-            scale=scale,
-            on_color=color,
-            off_color=COLOR_DARK_NEUTRAL,
-            border_color=COLOR_SLATE_GRAY,
-        )
-
     def _draw_map_grid(self, maps: np.ndarray, rect: tuple[float, float, float, float]) -> None:
         arr = np.asarray(maps, dtype=np.float32)
         count = min(arr.shape[0], 8)
@@ -85,14 +72,28 @@ class ConvRenderer:
             x = grid_left + col * (cell_w + gap)
             y = grid_bottom + grid_height - (row + 1) * cell_h - row * gap
             cell = (x, y, cell_w, cell_h)
-            self._draw_image(self._normalize_map(arr[idx]), cell, COLOR_AQUA)
+            draw_pixel_image_in_rect(
+                self._normalize_map(arr[idx]),
+                cell,
+                on_color=COLOR_AQUA,
+                off_color=COLOR_DARK_NEUTRAL,
+                border_color=COLOR_SLATE_GRAY,
+                padding=0.0,
+            )
 
     def draw(self, snapshot: dict[str, object], window: object) -> None:
         layout = window.layout(secondary=True)
         main_rect = layout.main
         preview_rect = layout.secondary if layout.secondary is not None else layout.text
         feature_key = "conv2" if int(self.config.selected_feature_layer) == 2 else "conv1"
-        self._draw_image(np.asarray(snapshot["image"], dtype=np.float32), preview_rect, COLOR_LIGHT_NEUTRAL)
+        draw_pixel_image_in_rect(
+            np.asarray(snapshot["image"], dtype=np.float32),
+            preview_rect,
+            on_color=COLOR_LIGHT_NEUTRAL,
+            off_color=COLOR_DARK_NEUTRAL,
+            border_color=COLOR_SLATE_GRAY,
+            padding=0.0,
+        )
         with clipped_rect(main_rect):
             self._draw_map_grid(np.asarray(snapshot[feature_key], dtype=np.float32), main_rect)
         status = "correct" if bool(snapshot["correct"]) else "misclassified"

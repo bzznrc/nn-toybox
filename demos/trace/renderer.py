@@ -13,7 +13,7 @@ from core.arcade_style import (
     COLOR_SLATE_GRAY,
     TOYBOX_CONNECTION_LINE_WIDTH,
 )
-from core.arcade_view import clipped_rect, draw_diamond_node, draw_pixel_image, marker_outer_radius, with_alpha
+from core.arcade_view import clipped_rect, draw_diamond_node, draw_pixel_image_in_rect, marker_outer_radius, with_alpha
 from demos.trace.config import TraceConfig
 
 
@@ -213,17 +213,14 @@ class TraceRenderer:
                 )
 
     def _draw_preview_panel(self, snapshot: dict[str, object], rect: tuple[float, float, float, float], window: object) -> None:
-        left, bottom, width, height = rect
-        image = np.asarray(snapshot["image"], dtype=np.float32)
-        scale = min(width, height) * 0.82 / 8.0
-        draw_pixel_image(
-            image,
-            left + (width - scale * 8.0) * 0.5,
-            bottom + (height - scale * 8.0) * 0.5,
-            scale=scale,
+        del window
+        draw_pixel_image_in_rect(
+            np.asarray(snapshot["image"], dtype=np.float32),
+            rect,
             on_color=COLOR_LIGHT_NEUTRAL,
             off_color=COLOR_DARK_NEUTRAL,
             border_color=COLOR_SLATE_GRAY,
+            padding=min(rect[2], rect[3]) * 0.09,
         )
 
     def draw(self, snapshot: dict[str, object], window: object) -> None:

@@ -52,13 +52,13 @@ Defaults:
 ## Commands
 
 ```bash
-python -m scripts.view --demo diffuse --dataset "Distributions - Gaussian Mixtures"
-python -m scripts.view --demo diffuse --preset nice --dataset "Distributions - Gaussian Mixtures"
-python -m scripts.view --demo diffuse --dataset "Distributions - Rings"
-python -m scripts.view --demo diffuse --dataset "Distributions - Spiral" --timesteps 60
-python -m scripts.view --demo diffuse --dataset "Distributions - Checkerboard" --noise-schedule cosine
+python -m nn_toybox.display --demo diffuse --dataset "Distributions - Gaussian Mixtures"
+python -m nn_toybox.display --demo diffuse --preset nice --dataset "Distributions - Gaussian Mixtures"
+python -m nn_toybox.display --demo diffuse --dataset "Distributions - Rings"
+python -m nn_toybox.display --demo diffuse --dataset "Distributions - Spiral" --timesteps 60
+python -m nn_toybox.display --demo diffuse --dataset "Distributions - Checkerboard" --noise-schedule cosine
 
-python -m scripts.train --demo diffuse --dataset "Distributions - Gaussian Mixtures" --steps 1000
+python -m nn_toybox.run --demo diffuse --dataset "Distributions - Gaussian Mixtures" --steps 1000
 python -m scripts.capture_demo --demo diffuse --dataset "Distributions - Gaussian Mixtures"
 ```
 
@@ -91,7 +91,7 @@ python -m scripts.capture_demo --demo diffuse --dataset "Distributions - Gaussia
 ## Failure Cases Worth Trying
 
 ```bash
-python -m scripts.view --demo diffuse --dataset "Distributions - Spiral" --timesteps 8
-python -m scripts.view --demo diffuse --dataset "Distributions - Checkerboard" --hidden-dim 16
-python -m scripts.train --demo diffuse --dataset "Distributions - Rings" --steps 20
+python -m nn_toybox.display --demo diffuse --dataset "Distributions - Spiral" --timesteps 8
+python -m nn_toybox.display --demo diffuse --dataset "Distributions - Checkerboard" --hidden-dim 16
+python -m nn_toybox.run --demo diffuse --dataset "Distributions - Rings" --steps 20
 ```

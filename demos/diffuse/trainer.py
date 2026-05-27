@@ -8,22 +8,17 @@ from torch import nn
 
 from core.checkpoints import RunPaths
 from core.plotting import save_diffusion_plot, save_loss_curve
+from core.torch_utils import torch_device
 from core.utils import set_seed
 from demos.diffuse.config import DiffuseConfig
 from demos.diffuse.data import make_dataset
 from demos.diffuse.model import TinyDenoiser, make_schedule, q_sample, sample_points
 
 
-def _torch_device(name: str) -> torch.device:
-    if str(name).lower() == "cuda" and torch.cuda.is_available():
-        return torch.device("cuda")
-    return torch.device("cpu")
-
-
 class DiffuseTrainer:
     def __init__(self, config: DiffuseConfig) -> None:
         self.config = config
-        self.device = _torch_device(config.device)
+        self.device = torch_device(config.device)
         self.reset(int(config.seed))
 
     def reset(self, seed: int | None = None) -> None:

@@ -848,6 +848,35 @@ def draw_pixel_image(
         arcade.draw_lbwh_rectangle_outline(left, bottom, cols * scale, rows * scale, border_color, 1.0)
 
 
+def draw_pixel_image_in_rect(
+    image: np.ndarray,
+    rect: tuple[float, float, float, float],
+    *,
+    on_color: tuple[int, int, int] = COLOR_AQUA,
+    off_color: tuple[int, int, int] = COLOR_DARK_NEUTRAL,
+    border_color: tuple[int, int, int] | None = None,
+    padding: float = 20.0,
+) -> None:
+    img = np.asarray(image, dtype=np.float32)
+    if img.ndim == 3:
+        img = img[0]
+    rows, cols = img.shape
+    left, bottom, width, height = rect
+    pad = max(0.0, min(float(padding), float(width) * 0.45, float(height) * 0.45))
+    scale = max(0.1, min((float(width) - 2.0 * pad) / max(1, cols), (float(height) - 2.0 * pad) / max(1, rows)))
+    draw_width = cols * scale
+    draw_height = rows * scale
+    draw_pixel_image(
+        img,
+        float(left) + (float(width) - draw_width) * 0.5,
+        float(bottom) + (float(height) - draw_height) * 0.5,
+        scale=scale,
+        on_color=on_color,
+        off_color=off_color,
+        border_color=border_color,
+    )
+
+
 class Trainer(Protocol):
     step_count: int
     metrics: dict[str, object]

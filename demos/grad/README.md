@@ -45,11 +45,11 @@ Defaults:
 ## Commands
 
 ```bash
-python -m scripts.view --demo grad --dataset "Distributions - Moons"
-python -m scripts.view --demo grad --dataset "Distributions - Spiral" --hidden-dim 64 --activation tanh
-python -m scripts.view --demo grad --dataset "Distributions - Checkerboard" --lr 0.03 --optimizer sgd
+python -m nn_toybox.display --demo grad --dataset "Distributions - Moons"
+python -m nn_toybox.display --demo grad --dataset "Distributions - Spiral" --hidden-dim 64 --activation tanh
+python -m nn_toybox.display --demo grad --dataset "Distributions - Checkerboard" --lr 0.03 --optimizer sgd
 
-python -m scripts.train --demo grad --dataset "Distributions - Moons" --steps 1000
+python -m nn_toybox.run --demo grad --dataset "Distributions - Moons" --steps 1000
 python -m scripts.capture_demo --demo grad --dataset "Distributions - Moons"
 ```
 
@@ -75,7 +75,7 @@ python -m scripts.capture_demo --demo grad --dataset "Distributions - Moons"
 ## Failure Cases Worth Trying
 
 ```bash
-python -m scripts.view --demo grad --dataset "Distributions - Spiral" --hidden-dim 8
-python -m scripts.view --demo grad --dataset "Distributions - Moons" --lr 1.0
-python -m scripts.view --demo grad --dataset "Distributions - Checkerboard" --layers 1
+python -m nn_toybox.display --demo grad --dataset "Distributions - Spiral" --hidden-dim 8
+python -m nn_toybox.display --demo grad --dataset "Distributions - Moons" --lr 1.0
+python -m nn_toybox.display --demo grad --dataset "Distributions - Checkerboard" --layers 1
 ```
