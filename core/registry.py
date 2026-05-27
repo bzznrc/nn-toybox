@@ -9,14 +9,13 @@ from typing import Callable
 from core.config import CommonConfig
 from core.datasets import (
     DIGIT_DATASET_KEYS,
-    DISTRIBUTION_DATASET_KEYS,
     IMAGE_DATASET_KEYS,
     TEXT_DATASET_KEYS,
     dataset_display_name,
     dataset_display_names,
     dataset_key,
 )
-from core.generated_2d import DIFFUSION_DATASET_KEYS
+from core.generated_2d import CLASSIFICATION_DATASET_KEYS, DIFFUSION_DATASET_KEYS
 from demos.attend.config import AttendConfig, add_attend_args
 from demos.conv.config import ConvConfig, add_conv_args
 from demos.diffuse.config import DiffuseConfig, add_diffuse_args
@@ -57,7 +56,7 @@ DEMO_SPECS: dict[str, DemoSpec] = {
         trainer_path="demos.grad.trainer.GradTrainer",
         renderer_path="demos.grad.renderer.GradRenderer",
         default_dataset=dataset_display_name("moons"),
-        dataset_keys=DISTRIBUTION_DATASET_KEYS,
+        dataset_keys=("distributions", *CLASSIFICATION_DATASET_KEYS),
         add_cli_args=add_grad_args,
     ),
     "embed": DemoSpec(
@@ -84,7 +83,7 @@ DEMO_SPECS: dict[str, DemoSpec] = {
         trainer_path="demos.diffuse.trainer.DiffuseTrainer",
         renderer_path="demos.diffuse.renderer.DiffuseRenderer",
         default_dataset=dataset_display_name("gaussian_mixtures"),
-        dataset_keys=DIFFUSION_DATASET_KEYS,
+        dataset_keys=("distributions", *DIFFUSION_DATASET_KEYS),
         add_cli_args=add_diffuse_args,
     ),
     "trace": DemoSpec(
@@ -127,13 +126,16 @@ DEMO_SPECS: dict[str, DemoSpec] = {
 
 
 DEMO_ORDER = tuple(DEMO_SPECS.keys())
+DEMO_ALIASES: dict[str, str] = {"autoencode": "encode"}
 
 
 def normalize_demo(value: str) -> str:
     key = str(value).strip().lower().replace("-", "_")
+    key = DEMO_ALIASES.get(key, key)
     if key not in DEMO_SPECS:
         valid = ", ".join(DEMO_ORDER)
-        raise ValueError(f"Unknown demo '{value}'. Valid: {valid}")
+        aliases = ", ".join(sorted(DEMO_ALIASES))
+        raise ValueError(f"Unknown demo '{value}'. Valid demos: {valid}. Valid aliases: {aliases}")
     return key
 
 

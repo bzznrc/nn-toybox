@@ -5,7 +5,7 @@ from __future__ import annotations
 import arcade
 import numpy as np
 
-from core.arcade_style import CLASS_COLOR_PAIRS, COLOR_BRICK_RED, COLOR_CORAL, COLOR_FOG_GRAY
+from core.arcade_style import CLASS_COLOR_PAIRS, COLOR_BRICK_RED, COLOR_CORAL, COLOR_DARK_NEUTRAL, COLOR_FOG_GRAY
 from core.arcade_view import clipped_rect, clamp_point_to_rect, draw_curve, draw_diamond_marker, draw_points, marker_outer_radius, with_alpha
 from demos.grad.config import GradConfig
 
@@ -13,6 +13,23 @@ from demos.grad.config import GradConfig
 class GradRenderer:
     def __init__(self, config: GradConfig) -> None:
         self.config = config
+
+    def on_key_press(self, symbol: int, modifiers: int, *, window: object) -> bool:
+        del modifiers
+        trainer = window.trainer
+        if symbol == arcade.key.UP:
+            trainer.cycle_distribution(1)
+            return True
+        if symbol == arcade.key.DOWN:
+            trainer.cycle_distribution(-1)
+            return True
+        if symbol == arcade.key.RIGHT:
+            trainer.cycle_optimizer(1)
+            return True
+        if symbol == arcade.key.LEFT:
+            trainer.cycle_optimizer(-1)
+            return True
+        return False
 
     def draw(self, snapshot: dict[str, object], window: object) -> None:
         layout = window.layout(secondary=True)
@@ -24,6 +41,7 @@ class GradRenderer:
         cell_w = width / float(resolution)
         cell_h = height / float(resolution)
         with clipped_rect(main_rect):
+            arcade.draw_lbwh_rectangle_filled(left, bottom, width, height, COLOR_DARK_NEUTRAL)
             for idx, label in enumerate(pred[: resolution * resolution]):
                 col = idx % resolution
                 row = idx // resolution
@@ -53,4 +71,14 @@ class GradRenderer:
             marker_radius = marker_outer_radius("small")
             marker_x, marker_y = clamp_point_to_rect(x, y, loss_rect, inset=marker_radius)
             draw_diamond_marker(marker_x, marker_y, outer_color=COLOR_CORAL, inner_color=COLOR_BRICK_RED, marker="small", alpha=245)
-        window.draw_info(snapshot, secondary=True, extra=(f"boundary resolution: {resolution}",))
+        metrics = dict(snapshot.get("metrics", {}))
+        window.draw_info(
+            snapshot,
+            secondary=True,
+            extra=(
+                f"distribution: {metrics.get('distribution', self.config.distribution)}",
+                f"optimizer: {self.config.optimizer}",
+                f"boundary resolution: {resolution}",
+                "keys: up/down distribution, left/right optimizer",
+            ),
+        )

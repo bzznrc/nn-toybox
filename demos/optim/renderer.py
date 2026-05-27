@@ -5,7 +5,7 @@ from __future__ import annotations
 import arcade
 import numpy as np
 
-from core.arcade_style import COLOR_AQUA, COLOR_CORAL, COLOR_DARK_NEUTRAL, COLOR_FOG_GRAY, COLOR_LIGHT_NEUTRAL, COLOR_SLATE_GRAY
+from core.arcade_style import COLOR_AQUA, COLOR_DARK_NEUTRAL, COLOR_DEEP_TEAL, COLOR_FOG_GRAY, COLOR_LIGHT_NEUTRAL, COLOR_SLATE_GRAY
 from core.arcade_view import clipped_rect, draw_curve, draw_diamond_node, with_alpha
 from demos.optim.config import OptimConfig
 from demos.optim.data import XLIM, YLIM
@@ -18,11 +18,17 @@ class OptimRenderer:
     def on_key_press(self, symbol: int, modifiers: int, *, window: object) -> bool:
         del modifiers
         trainer = window.trainer
-        if symbol == arcade.key.O:
+        if symbol == arcade.key.UP:
+            trainer.cycle_landscape(1)
+            return True
+        if symbol == arcade.key.DOWN:
+            trainer.cycle_landscape(-1)
+            return True
+        if symbol == arcade.key.RIGHT:
             trainer.cycle_optimizer(1)
             return True
-        if symbol == arcade.key.L:
-            trainer.cycle_landscape(1)
+        if symbol == arcade.key.LEFT:
+            trainer.cycle_optimizer(-1)
             return True
         if symbol == arcade.key.G:
             trainer.new_start()
@@ -45,23 +51,40 @@ class OptimRenderer:
         y = (arr[:, 1] - YLIM[0]) / max(1e-6, YLIM[1] - YLIM[0])
         return np.column_stack([left + x * width, bottom + y * height]).astype(np.float32)
 
+    @staticmethod
+    def _lerp_color(
+        start: tuple[int, int, int],
+        end: tuple[int, int, int],
+        ratio: float,
+    ) -> tuple[int, int, int]:
+        t = max(0.0, min(1.0, float(ratio)))
+        return (
+            int(start[0] + (end[0] - start[0]) * t),
+            int(start[1] + (end[1] - start[1]) * t),
+            int(start[2] + (end[2] - start[2]) * t),
+        )
+
     def _draw_landscape(self, values: np.ndarray, rect: tuple[float, float, float, float]) -> None:
         arr = np.asarray(values, dtype=np.float32)
         left, bottom, width, height = rect
         rows, cols = arr.shape
-        lo = float(np.percentile(arr, 3))
-        hi = float(np.percentile(arr, 97))
+        finite = arr[np.isfinite(arr)]
+        if finite.size == 0:
+            arcade.draw_lbwh_rectangle_filled(left, bottom, width, height, COLOR_DARK_NEUTRAL)
+            return
+        lo = float(np.percentile(finite, 2))
+        hi = float(np.percentile(finite, 98))
+        span = max(1e-6, hi - lo)
         cell_w = width / max(1, cols)
         cell_h = height / max(1, rows)
         for row in range(rows):
             for col in range(cols):
-                ratio = (float(arr[row, col]) - lo) / max(1e-6, hi - lo)
+                ratio = (float(arr[row, col]) - lo) / span
                 ratio = max(0.0, min(1.0, ratio))
-                color = (
-                    int(COLOR_DARK_NEUTRAL[0] + (COLOR_SLATE_GRAY[0] - COLOR_DARK_NEUTRAL[0]) * ratio),
-                    int(COLOR_DARK_NEUTRAL[1] + (COLOR_AQUA[1] - COLOR_DARK_NEUTRAL[1]) * ratio),
-                    int(COLOR_DARK_NEUTRAL[2] + (COLOR_CORAL[2] - COLOR_DARK_NEUTRAL[2]) * ratio),
-                )
+                if ratio < 0.55:
+                    color = self._lerp_color(COLOR_AQUA, COLOR_SLATE_GRAY, ratio / 0.55)
+                else:
+                    color = self._lerp_color(COLOR_SLATE_GRAY, COLOR_DARK_NEUTRAL, (ratio - 0.55) / 0.45)
                 arcade.draw_lbwh_rectangle_filled(left + col * cell_w, bottom + row * cell_h, cell_w + 0.5, cell_h + 0.5, color)
 
     def _draw_trail(self, trail: np.ndarray, point: np.ndarray, rect: tuple[float, float, float, float]) -> None:
@@ -75,13 +98,13 @@ class OptimRenderer:
             float(current[0]),
             float(current[1]),
             radius=12.0,
-            fill_color=COLOR_CORAL,
-            outline_color=COLOR_FOG_GRAY,
-            alpha=115,
-            outline_alpha=170,
+            fill_color=COLOR_AQUA,
+            outline_color=COLOR_DEEP_TEAL,
+            alpha=230,
+            outline_alpha=245,
             outline_width=1.5,
             inner_radius=6.5,
-            inner_color=COLOR_CORAL,
+            inner_color=COLOR_DEEP_TEAL,
             inner_alpha=245,
         )
 
@@ -101,6 +124,6 @@ class OptimRenderer:
             f"optimizer: {metrics.get('optimizer', self.config.optimizer)}",
             f"lr: {float(self.config.lr):.4f}",
             f"point: {float(point[0]):.2f}, {float(point[1]):.2f}",
-            "keys: O optimizer, L landscape, G start, +/- lr",
+            "keys: up/down landscape, left/right optimizer, G start, +/- lr",
         )
         window.draw_info(snapshot, secondary=True, extra=extra)

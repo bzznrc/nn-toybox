@@ -45,6 +45,23 @@ class EmbedRenderer:
         self.mouse_xy = (float(x), float(y))
         return False
 
+    def on_key_press(self, symbol: int, modifiers: int, *, window: object) -> bool:
+        del modifiers
+        trainer = window.trainer
+        if symbol == arcade.key.UP:
+            trainer.cycle_dataset(1)
+            return True
+        if symbol == arcade.key.DOWN:
+            trainer.cycle_dataset(-1)
+            return True
+        if symbol == arcade.key.RIGHT:
+            trainer.cycle_embedding_dim(1)
+            return True
+        if symbol == arcade.key.LEFT:
+            trainer.cycle_embedding_dim(-1)
+            return True
+        return False
+
     @staticmethod
     def _nearest(coords: np.ndarray, selected: int, *, count: int = 5) -> list[tuple[float, int]]:
         delta = np.asarray(coords, dtype=np.float32) - np.asarray(coords[int(selected)], dtype=np.float32)
@@ -141,7 +158,11 @@ class EmbedRenderer:
                 bold=True,
             )
 
-        extra = [f"selected: {tokens[selected]}"]
+        extra = [
+            f"selected: {tokens[selected]}",
+            f"embedding dim: {int(self.config.embedding_dim)}",
+            "keys: up/down dataset, left/right embedding dim",
+        ]
         window.draw_info(snapshot, secondary=True, extra=tuple(extra))
 
     def _hovered_index(self, xy: np.ndarray, rect: tuple[float, float, float, float]) -> int | None:

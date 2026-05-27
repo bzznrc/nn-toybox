@@ -6,6 +6,7 @@ import argparse
 from dataclasses import dataclass
 
 from core.config import CommonConfig
+from demos.optim.data import LANDSCAPES
 
 
 @dataclass
@@ -37,7 +38,7 @@ class OptimConfig(CommonConfig):
 
 
 def add_optim_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--landscape", choices=["bowl", "ravine", "saddle", "two_basins", "noisy_bowl"], default=None)
+    parser.add_argument("--landscape", choices=list(LANDSCAPES), default=None)
     parser.add_argument("--optimizer", choices=["sgd", "momentum", "adam"], default=None)
     parser.add_argument("--momentum", type=float, default=None)
     parser.add_argument("--start-point", default=None)

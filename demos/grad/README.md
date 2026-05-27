@@ -45,12 +45,12 @@ Defaults:
 ## Commands
 
 ```bash
-python -m nn_toybox.display --demo grad --dataset "Distributions - Moons"
-python -m nn_toybox.display --demo grad --dataset "Distributions - Spiral" --hidden-dim 64 --activation tanh
-python -m nn_toybox.display --demo grad --dataset "Distributions - Checkerboard" --lr 0.03 --optimizer sgd
+python -m scripts.display --demo grad --dataset moons
+python -m scripts.display --demo grad --dataset spirals --hidden-dim 64 --activation tanh
+python -m scripts.display --demo grad --dataset checkerboard --lr 0.03 --optimizer sgd
 
-python -m nn_toybox.run --demo grad --dataset "Distributions - Moons" --steps 1000
-python -m scripts.capture_demo --demo grad --dataset "Distributions - Moons"
+python -m scripts.run --demo grad --dataset moons --steps 1000
+python -m scripts.capture_demo --demo grad --dataset moons
 ```
 
 ## Look For
@@ -62,7 +62,8 @@ python -m scripts.capture_demo --demo grad --dataset "Distributions - Moons"
 
 ## Knobs
 
-- `--dataset`: `Distributions - Blobs`, `Distributions - Gaussian Mixtures`, `Distributions - Circles`, `Distributions - Rings`, `Distributions - Moons`, `Distributions - XOR`, `Distributions - Checkerboard`, `Distributions - Spiral`
+- `--dataset`: `Distributions` or a friendly distribution alias such as `moons`, `circles`, `rings`, `spirals`, `gaussian-mixtures`, `checkerboard`
+- `--distribution`: `blobs`, `gaussian_mixtures`, `circles`, `rings`, `moons`, `xor`, `checkerboard`, `spirals`
 - `--hidden-dim`
 - `--layers`
 - `--activation`
@@ -75,7 +76,7 @@ python -m scripts.capture_demo --demo grad --dataset "Distributions - Moons"
 ## Failure Cases Worth Trying
 
 ```bash
-python -m nn_toybox.display --demo grad --dataset "Distributions - Spiral" --hidden-dim 8
-python -m nn_toybox.display --demo grad --dataset "Distributions - Moons" --lr 1.0
-python -m nn_toybox.display --demo grad --dataset "Distributions - Checkerboard" --layers 1
+python -m scripts.display --demo grad --dataset spirals --hidden-dim 8
+python -m scripts.display --demo grad --dataset moons --lr 1.0
+python -m scripts.display --demo grad --dataset checkerboard --layers 1
 ```

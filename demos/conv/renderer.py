@@ -23,16 +23,16 @@ class ConvRenderer:
         del modifiers
         trainer = window.trainer
         if symbol == arcade.key.RIGHT:
-            trainer.next_variation(1)
-            return True
-        if symbol == arcade.key.LEFT:
-            trainer.next_variation(-1)
-            return True
-        if symbol == arcade.key.UP:
             trainer.cycle_digit(1)
             return True
-        if symbol == arcade.key.DOWN:
+        if symbol == arcade.key.LEFT:
             trainer.cycle_digit(-1)
+            return True
+        if symbol == arcade.key.UP:
+            trainer.next_variation(1)
+            return True
+        if symbol == arcade.key.DOWN:
+            trainer.next_variation(-1)
             return True
         if symbol == arcade.key.G:
             trainer.random_example()
@@ -104,5 +104,6 @@ class ConvRenderer:
             f"variation: {int(snapshot.get('variation_index', 0)) + 1}",
             f"feature layer: {feature_key}",
             f"noise: {float(self.config.noise_amount):.2f}",
+            "keys: up/down variation, left/right digit",
         )
         window.draw_info(snapshot, secondary=True, extra=extra, compact=True)

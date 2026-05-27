@@ -1,4 +1,4 @@
-"""Canonical dataset names."""
+"""Canonical dataset names and friendly aliases."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ from typing import Iterable
 
 
 DISTRIBUTION_DATASET_KEYS = (
+    "distributions",
     "blobs",
     "gaussian_mixtures",
     "circles",
@@ -23,6 +24,7 @@ DATASET_KEYS = DISTRIBUTION_DATASET_KEYS + TEXT_DATASET_KEYS + IMAGE_DATASET_KEY
 
 
 DATASET_DISPLAY_NAMES: dict[str, str] = {
+    "distributions": "Distributions",
     "blobs": "Distributions - Blobs",
     "gaussian_mixtures": "Distributions - Gaussian Mixtures",
     "circles": "Distributions - Circles",
@@ -42,14 +44,41 @@ DATASET_DISPLAY_NAMES: dict[str, str] = {
 
 
 DATASET_KEYS_BY_DISPLAY_NAME: dict[str, str] = {name: key for key, name in DATASET_DISPLAY_NAMES.items()}
+DATASET_ALIASES: dict[str, str] = {
+    "moons": "moons",
+    "circles": "circles",
+    "spiral": "spirals",
+    "spirals": "spirals",
+    "rings": "rings",
+    "gaussian-mixtures": "gaussian_mixtures",
+    "gaussian_mixtures": "gaussian_mixtures",
+    "mixtures": "gaussian_mixtures",
+    "checkerboard": "checkerboard",
+    "icons": "icons",
+    "digits8": "digits8_mini",
+    "digits": "digits8_mini",
+    "8x8-digits": "digits8_mini",
+    "tiny-semantics": "tiny_semantics",
+    "tiny_semantics": "tiny_semantics",
+    "big-tiny-semantics": "big_tiny_semantics",
+    "big_tiny_semantics": "big_tiny_semantics",
+}
+
+
+def _alias_text(value: object) -> str:
+    return str(value).strip().lower()
 
 
 def dataset_key(value: object) -> str:
     name = str(value).strip()
     if name in DATASET_KEYS_BY_DISPLAY_NAME:
         return DATASET_KEYS_BY_DISPLAY_NAME[name]
+    alias = DATASET_ALIASES.get(_alias_text(value))
+    if alias is not None:
+        return alias
     valid = ", ".join(DATASET_DISPLAY_NAMES.values())
-    raise ValueError(f"Unknown dataset '{value}'. Use exactly one of: {valid}")
+    aliases = ", ".join(sorted(DATASET_ALIASES))
+    raise ValueError(f"Unknown dataset '{value}'. Valid canonical names: {valid}. Valid aliases: {aliases}")
 
 
 def dataset_display_name(key: object) -> str:

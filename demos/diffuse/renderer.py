@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import arcade
 import numpy as np
 
 from core.arcade_style import (
@@ -19,6 +20,23 @@ from demos.diffuse.config import DiffuseConfig
 class DiffuseRenderer:
     def __init__(self, config: DiffuseConfig) -> None:
         self.config = config
+
+    def on_key_press(self, symbol: int, modifiers: int, *, window: object) -> bool:
+        del modifiers
+        trainer = window.trainer
+        if symbol == arcade.key.UP:
+            trainer.cycle_distribution(1)
+            return True
+        if symbol == arcade.key.DOWN:
+            trainer.cycle_distribution(-1)
+            return True
+        if symbol == arcade.key.RIGHT:
+            trainer.cycle_noise_schedule(1)
+            return True
+        if symbol == arcade.key.LEFT:
+            trainer.cycle_noise_schedule(-1)
+            return True
+        return False
 
     def draw(self, snapshot: dict[str, object], window: object) -> None:
         layout = window.layout(secondary=True)
@@ -67,7 +85,10 @@ class DiffuseRenderer:
             extra=(
                 f"trajectory frame: {frame + 1} / {max(1, len(trajectory))}",
                 f"generated samples: {len(generated)}",
+                f"distribution: {metrics.get('distribution', self.config.distribution)}",
+                f"noise schedule: {metrics.get('noise_schedule', self.config.noise_schedule)}",
                 f"preview timesteps: {int(self.config.sample_timesteps)}",
                 f"sample refresh: {int(self.config.sample_refresh_every)} steps",
+                "keys: up/down distribution, left/right noise schedule",
             ),
         )

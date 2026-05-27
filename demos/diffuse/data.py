@@ -11,7 +11,7 @@ DATASETS = DIFFUSION_DATASETS
 
 
 def make_dataset(
-    name: str = "Distributions - Gaussian Mixtures",
+    name: str = "gaussian_mixtures",
     n: int = 1024,
     noise: float = 0.04,
     seed: int = 0,

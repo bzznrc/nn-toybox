@@ -22,7 +22,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     add_common_args(parser, DEMO_ORDER)
     add_display_args(parser)
     if known.demo is not None:
-        spec = get_demo_spec(known.demo)
+        try:
+            spec = get_demo_spec(known.demo)
+        except ValueError as exc:
+            raise SystemExit(str(exc)) from None
         spec.add_cli_args(parser)
     return parser.parse_args(argv)
 
@@ -30,6 +33,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> None:
     args = parse_args(argv)
     spec = get_demo_spec(args.demo)
+    args.demo = spec.name
     try:
         config = config_from_args(spec.config_cls, args, default_dataset=spec.default_dataset)
         config.dataset = validate_demo_dataset(spec, config.dataset)

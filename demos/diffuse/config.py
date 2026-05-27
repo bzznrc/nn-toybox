@@ -6,6 +6,8 @@ import argparse
 from dataclasses import dataclass
 
 from core.config import CommonConfig
+from core.datasets import dataset_key
+from core.generated_2d import DIFFUSION_DATASET_KEYS, normalize_distribution_variant
 
 
 @dataclass
@@ -14,6 +16,7 @@ class DiffuseConfig(CommonConfig):
     lr: float = 0.002
     hidden_dim: int = 64
     batch_size: int = 128
+    distribution: str = "gaussian_mixtures"
     n_points: int = 512
     noise: float = 0.04
     timesteps: int = 16
@@ -47,11 +50,19 @@ class DiffuseConfig(CommonConfig):
         elif preset != "fast":
             raise ValueError(f"Unknown diffuse preset '{preset}'. Valid: fast, nice")
         resolved["preset"] = preset
+        dataset = dataset_key(resolved.get("dataset", "Distributions - Gaussian Mixtures"))
+        if dataset in DIFFUSION_DATASET_KEYS:
+            resolved["distribution"] = dataset
+        resolved["distribution"] = normalize_distribution_variant(
+            resolved.get("distribution", "gaussian_mixtures"),
+            choices=DIFFUSION_DATASET_KEYS,
+        )
         return resolved
 
 
 def add_diffuse_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--preset", choices=["fast", "nice"], default=None)
+    parser.add_argument("--distribution", choices=list(DIFFUSION_DATASET_KEYS), default=None)
     parser.add_argument("--n-points", type=int, default=None)
     parser.add_argument("--noise", type=float, default=None)
     parser.add_argument("--timesteps", type=int, default=None)

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Sequence
 
 from core.registry import DEMO_ORDER
-from scripts.train import main as run_main
+from scripts.run import main as run_main
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -20,14 +20,14 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def _args_for(demo: str, output_dir: str | None) -> list[str]:
     args = ["--demo", demo, "--steps", "2", "--run-name", f"{demo}_smoke", "--save-every", "0"]
     if demo == "grad":
-        args.extend(["--dataset", "Distributions - Moons", "--n-points", "64", "--batch-size", "32"])
+        args.extend(["--dataset", "moons", "--n-points", "64", "--batch-size", "32"])
     if demo == "encode":
         args.extend(["--n-samples", "64", "--batch-size", "32"])
     if demo == "diffuse":
         args.extend(
             [
                 "--dataset",
-                "Distributions - Gaussian Mixtures",
+                "gaussian-mixtures",
                 "--n-points",
                 "64",
                 "--batch-size",

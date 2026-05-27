@@ -7,6 +7,8 @@ import torch
 from torch import nn
 
 from core.checkpoints import RunPaths
+from core.cycling import cycle_value
+from core.datasets import TEXT_DATASET_KEYS, dataset_display_names
 from core.plotting import save_embedding_plot, save_loss_curve
 from core.torch_utils import torch_device
 from core.utils import set_seed
@@ -60,6 +62,15 @@ class EmbedTrainer:
         self.losses: list[float] = []
         self.last_loss: float | None = None
         self.step_count = 0
+
+    def cycle_dataset(self, delta: int = 1) -> None:
+        self.config.dataset = cycle_value(dataset_display_names(TEXT_DATASET_KEYS), self.config.dataset, delta)
+        self.reset(int(self.config.seed))
+
+    def cycle_embedding_dim(self, delta: int = 1) -> None:
+        values = ("1", "2", "3")
+        self.config.embedding_dim = int(cycle_value(values, str(int(self.config.embedding_dim)), delta))
+        self.reset(int(self.config.seed))
 
     def _sample_pairs(self) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         neg_count = max(1, len(self.pos_ids) * int(self.config.negative_samples))

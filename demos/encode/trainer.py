@@ -7,6 +7,8 @@ import torch
 from torch import nn
 
 from core.checkpoints import RunPaths
+from core.cycling import cycle_value
+from core.datasets import IMAGE_DATASET_KEYS, dataset_display_names
 from core.plotting import save_loss_curve, save_reconstruction_grid
 from core.torch_utils import torch_device
 from core.utils import set_seed
@@ -46,6 +48,15 @@ class EncodeTrainer:
         self.last_loss: float | None = None
         self.step_count = 0
         self.preview_indices = np.arange(min(8, len(self.images)))
+
+    def cycle_dataset(self, delta: int = 1) -> None:
+        self.config.dataset = cycle_value(dataset_display_names(IMAGE_DATASET_KEYS), self.config.dataset, delta)
+        self.reset(int(self.config.seed))
+
+    def cycle_latent_dim(self, delta: int = 1) -> None:
+        values = ("2", "4", "8", "16")
+        self.config.latent_dim = int(cycle_value(values, str(int(self.config.latent_dim)), delta))
+        self.reset(int(self.config.seed))
 
     def step(self, n_steps: int = 1) -> None:
         batch_size = min(len(self.images), max(1, int(self.config.batch_size)))

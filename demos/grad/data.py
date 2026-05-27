@@ -11,7 +11,7 @@ DATASETS = CLASSIFICATION_DATASETS
 
 
 def make_dataset(
-    name: str = "Distributions - Moons",
+    name: str = "moons",
     n: int = 512,
     noise: float = 0.08,
     seed: int = 0,

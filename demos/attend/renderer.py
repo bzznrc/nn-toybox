@@ -216,9 +216,7 @@ class AttendRenderer:
             x = left + pad + idx * (bar_w + gap)
             y = bottom + 30.0
             value = max(0.0, min(1.0, float(probs[idx])))
-            color = COLOR_AQUA if idx == pred else COLOR_SLATE_GRAY
-            if idx == target and idx != pred:
-                color = COLOR_CORAL
+            color = COLOR_FOG_GRAY if idx == pred else COLOR_SLATE_GRAY
             arcade.draw_lbwh_rectangle_filled(x, y, bar_w, track_h, with_alpha(COLOR_SLATE_GRAY, TOYBOX_CHART_TRACK_ALPHA))
             arcade.draw_lbwh_rectangle_filled(x, y, bar_w, track_h * value, with_alpha(color, TOYBOX_CHART_FILL_ALPHA))
             if idx == target:

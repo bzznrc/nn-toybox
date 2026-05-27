@@ -43,12 +43,13 @@ Defaults:
 ## Commands
 
 ```bash
-python -m nn_toybox.display --demo encode
-python -m nn_toybox.display --demo encode --dataset "Images - Patterns"
-python -m nn_toybox.display --demo encode --latent-dim 2
-python -m nn_toybox.display --demo encode --latent-dim 16 --hidden-dim 96
+python -m scripts.display --demo encode
+python -m scripts.display --demo encode --dataset "Images - Patterns"
+python -m scripts.display --demo autoencode --dataset icons
+python -m scripts.display --demo encode --latent-dim 2
+python -m scripts.display --demo encode --latent-dim 16 --hidden-dim 96
 
-python -m nn_toybox.run --demo encode --steps 1000
+python -m scripts.run --demo encode --steps 1000
 python -m scripts.capture_demo --demo encode
 ```
 
@@ -61,7 +62,7 @@ python -m scripts.capture_demo --demo encode
 
 ## Knobs
 
-- `--dataset`: `Images - Icons`, `Images - Patterns`
+- `--dataset`: `Images - Icons`, `Images - Patterns`, or friendly alias `icons`
 - `--latent-dim`
 - `--hidden-dim`
 - `--image-size`
@@ -73,7 +74,7 @@ python -m scripts.capture_demo --demo encode
 ## Failure Cases Worth Trying
 
 ```bash
-python -m nn_toybox.display --demo encode --latent-dim 1
-python -m nn_toybox.display --demo encode --noise 0.15
-python -m nn_toybox.display --demo encode --hidden-dim 16
+python -m scripts.display --demo encode --latent-dim 1
+python -m scripts.display --demo encode --noise 0.15
+python -m scripts.display --demo encode --hidden-dim 16
 ```

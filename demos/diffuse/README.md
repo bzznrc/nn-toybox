@@ -52,14 +52,14 @@ Defaults:
 ## Commands
 
 ```bash
-python -m nn_toybox.display --demo diffuse --dataset "Distributions - Gaussian Mixtures"
-python -m nn_toybox.display --demo diffuse --preset nice --dataset "Distributions - Gaussian Mixtures"
-python -m nn_toybox.display --demo diffuse --dataset "Distributions - Rings"
-python -m nn_toybox.display --demo diffuse --dataset "Distributions - Spiral" --timesteps 60
-python -m nn_toybox.display --demo diffuse --dataset "Distributions - Checkerboard" --noise-schedule cosine
+python -m scripts.display --demo diffuse --dataset gaussian-mixtures
+python -m scripts.display --demo diffuse --preset nice --dataset gaussian-mixtures
+python -m scripts.display --demo diffuse --dataset rings
+python -m scripts.display --demo diffuse --dataset spirals --timesteps 60
+python -m scripts.display --demo diffuse --dataset checkerboard --noise-schedule cosine
 
-python -m nn_toybox.run --demo diffuse --dataset "Distributions - Gaussian Mixtures" --steps 1000
-python -m scripts.capture_demo --demo diffuse --dataset "Distributions - Gaussian Mixtures"
+python -m scripts.run --demo diffuse --dataset gaussian-mixtures --steps 1000
+python -m scripts.capture_demo --demo diffuse --dataset gaussian-mixtures
 ```
 
 ## Look For
@@ -73,7 +73,8 @@ python -m scripts.capture_demo --demo diffuse --dataset "Distributions - Gaussia
 
 ## Knobs
 
-- `--dataset`: `Distributions - Gaussian Mixtures`, `Distributions - Rings`, `Distributions - Moons`, `Distributions - Checkerboard`, `Distributions - Spiral`
+- `--dataset`: `Distributions` or a friendly point-cloud alias such as `gaussian-mixtures`, `rings`, `moons`, `checkerboard`, `spirals`
+- `--distribution`: `gaussian_mixtures`, `rings`, `moons`, `checkerboard`, `spirals`
 - `--preset`: `fast` or `nice`
 - `--timesteps`
 - `--sample-timesteps`
@@ -91,7 +92,7 @@ python -m scripts.capture_demo --demo diffuse --dataset "Distributions - Gaussia
 ## Failure Cases Worth Trying
 
 ```bash
-python -m nn_toybox.display --demo diffuse --dataset "Distributions - Spiral" --timesteps 8
-python -m nn_toybox.display --demo diffuse --dataset "Distributions - Checkerboard" --hidden-dim 16
-python -m nn_toybox.run --demo diffuse --dataset "Distributions - Rings" --steps 20
+python -m scripts.display --demo diffuse --dataset spirals --timesteps 8
+python -m scripts.display --demo diffuse --dataset checkerboard --hidden-dim 16
+python -m scripts.run --demo diffuse --dataset rings --steps 20
 ```

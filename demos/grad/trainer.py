@@ -7,12 +7,14 @@ import torch
 from torch import nn
 
 from core.checkpoints import RunPaths
+from core.cycling import cycle_value
 from core.plotting import save_grad_plot, save_loss_curve
 from core.torch_utils import torch_device
 from core.utils import set_seed
 from demos.grad.config import GradConfig
 from demos.grad.data import make_dataset
 from demos.grad.model import TinyMLP
+from core.generated_2d import CLASSIFICATION_DATASET_KEYS
 
 
 class GradTrainer:
@@ -27,7 +29,7 @@ class GradTrainer:
         set_seed(int(self.config.seed))
         self.rng = np.random.default_rng(int(self.config.seed))
         self.points, self.labels = make_dataset(
-            self.config.dataset,
+            self.config.distribution,
             n=int(self.config.n_points),
             noise=float(self.config.noise),
             seed=int(self.config.seed),
@@ -51,6 +53,14 @@ class GradTrainer:
         if str(self.config.optimizer).lower() == "sgd":
             return torch.optim.SGD(self.model.parameters(), lr=float(self.config.lr), momentum=0.9)
         return torch.optim.Adam(self.model.parameters(), lr=float(self.config.lr))
+
+    def cycle_distribution(self, delta: int = 1) -> None:
+        self.config.distribution = cycle_value(CLASSIFICATION_DATASET_KEYS, self.config.distribution, delta)
+        self.reset(int(self.config.seed))
+
+    def cycle_optimizer(self, delta: int = 1) -> None:
+        self.config.optimizer = cycle_value(("adam", "sgd"), self.config.optimizer, delta)
+        self.reset(int(self.config.seed))
 
     def step(self, n_steps: int = 1) -> None:
         batch_size = min(len(self.points), max(1, int(self.config.batch_size)))
@@ -76,6 +86,7 @@ class GradTrainer:
         return {
             "demo": "grad",
             "dataset": self.config.dataset,
+            "distribution": self.config.distribution,
             "step": int(self.step_count),
             "loss": self.last_loss,
             "accuracy": self._accuracy(),

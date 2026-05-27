@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import lru_cache
+from importlib.resources import as_file, files
 from io import BytesIO
 from pathlib import Path
 import zipfile
@@ -15,7 +16,9 @@ from core.config import PROJECT_ROOT
 
 
 DIGIT_LABELS: tuple[int, ...] = tuple(range(10))
-DEFAULT_DIGITS8_ZIP = PROJECT_ROOT / "assets" / "digits8_mini_8x8.zip"
+DIGITS8_ZIP_NAME = "digits8_mini_8x8.zip"
+PACKAGE_ASSET_MODULE = "assets"
+DEFAULT_DIGITS8_ZIP = PROJECT_ROOT / "assets" / DIGITS8_ZIP_NAME
 VALID_SPLITS = ("train", "inference")
 
 
@@ -47,7 +50,7 @@ class Digits8Dataset:
 class Digits8Browser:
     """Shared deterministic browsing semantics for digit demo viewers.
 
-    Left/right move through variations of the current digit. Up/down move to the
+    Up/down move through variations of the current digit. Left/right move to the
     previous/next digit while keeping the same variation slot when possible.
     """
 
@@ -115,6 +118,12 @@ def _resolve_zip_path(zip_path: str | Path | None = None) -> Path:
     return target
 
 
+def packaged_digits8_asset():
+    """Return the importlib resource for the packaged digits zip."""
+
+    return files(PACKAGE_ASSET_MODULE).joinpath(DIGITS8_ZIP_NAME)
+
+
 @lru_cache(maxsize=4)
 def _load_split_cached(split: str, zip_path_text: str) -> Digits8Split:
     split_key = _normalize_split(split)
@@ -161,8 +170,20 @@ def load_digits8_split(
     ``[N, 1, 8, 8]``; otherwise it is ``[N, 8, 8]``.
     """
 
-    target = _resolve_zip_path(zip_path)
-    loaded = _load_split_cached(_normalize_split(split), str(target))
+    split_key = _normalize_split(split)
+    if zip_path is not None:
+        target = _resolve_zip_path(zip_path)
+        loaded = _load_split_cached(split_key, str(target))
+    else:
+        try:
+            resource = packaged_digits8_asset()
+            if not resource.is_file():
+                raise FileNotFoundError(str(resource))
+            with as_file(resource) as target:
+                loaded = _load_split_cached(split_key, str(target.resolve()))
+        except (FileNotFoundError, ModuleNotFoundError):
+            target = _resolve_zip_path(DEFAULT_DIGITS8_ZIP)
+            loaded = _load_split_cached(split_key, str(target))
     images = loaded.images
     if channel_first:
         images = images[:, None, :, :]

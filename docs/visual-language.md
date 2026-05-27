@@ -50,10 +50,16 @@ The `Key:` part of a `Key: Value` line is bold. Wrapped continuation lines start
 
 ## Digit Browsing
 
+Arrow keys use shared browse semantics wherever a demo has these axes:
+
+- Up/down arrows rotate datasets or within-dataset variations.
+- Left/right arrows rotate model or algorithm choices.
+- Digit demos use up/down for variations of the current digit and left/right for digit classes.
+
 Any demo browsing the bundled digits dataset should use the shared `Digits8Browser` semantics:
 
-- Left/right arrows move through variations of the current digit.
-- Up/down arrows move through digit classes while keeping the same variation slot when possible.
+- Up/down arrows move through variations of the current digit.
+- Left/right arrows move through digit classes while keeping the same variation slot when possible.
 - `G` may select a random example.
 
 ## Palette

@@ -48,12 +48,12 @@ Defaults:
 ## Commands
 
 ```bash
-python -m nn_toybox.display --demo embed
-python -m nn_toybox.display --demo embed --dataset "Text - Big Tiny Semantics"
-python -m nn_toybox.display --demo embed --noise-pairs 4
-python -m nn_toybox.display --demo embed --embedding-dim 3
+python -m scripts.display --demo embed
+python -m scripts.display --demo embed --dataset "Text - Big Tiny Semantics"
+python -m scripts.display --demo embed --noise-pairs 4
+python -m scripts.display --demo embed --embedding-dim 3
 
-python -m nn_toybox.run --demo embed --steps 1000
+python -m scripts.run --demo embed --steps 1000
 python -m scripts.capture_demo --demo embed
 ```
 
@@ -66,7 +66,7 @@ python -m scripts.capture_demo --demo embed
 
 ## Knobs
 
-- `--dataset`: `Text - Tiny Semantics`, `Text - Big Tiny Semantics`
+- `--dataset`: `Text - Tiny Semantics`, `Text - Big Tiny Semantics`, or friendly aliases `tiny-semantics`, `big-tiny-semantics`
 - `--embedding-dim`
 - `--negative-samples`
 - `--noise-pairs`
@@ -76,7 +76,7 @@ python -m scripts.capture_demo --demo embed
 ## Failure Cases Worth Trying
 
 ```bash
-python -m nn_toybox.display --demo embed --noise-pairs 8
-python -m nn_toybox.display --demo embed --embedding-dim 1
-python -m nn_toybox.run --demo embed --steps 20
+python -m scripts.display --demo embed --noise-pairs 8
+python -m scripts.display --demo embed --embedding-dim 1
+python -m scripts.run --demo embed --steps 20
 ```

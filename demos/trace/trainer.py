@@ -15,7 +15,7 @@ from core.torch_utils import torch_device
 from core.utils import set_seed
 from demos.trace.config import TraceConfig
 from demos.trace.model import TinyTraceMLP
-from nn_toybox.shared.digits8 import Digits8Browser, load_digits8_split
+from core.digits8 import Digits8Browser, load_digits8_split
 
 
 def _relative_path(path_text: str) -> Path:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import arcade
 import numpy as np
 
 from core.arcade_style import COLOR_AQUA, COLOR_CORAL
@@ -12,6 +13,23 @@ from demos.encode.config import EncodeConfig
 class EncodeRenderer:
     def __init__(self, config: EncodeConfig) -> None:
         self.config = config
+
+    def on_key_press(self, symbol: int, modifiers: int, *, window: object) -> bool:
+        del modifiers
+        trainer = window.trainer
+        if symbol == arcade.key.UP:
+            trainer.cycle_dataset(1)
+            return True
+        if symbol == arcade.key.DOWN:
+            trainer.cycle_dataset(-1)
+            return True
+        if symbol == arcade.key.RIGHT:
+            trainer.cycle_latent_dim(1)
+            return True
+        if symbol == arcade.key.LEFT:
+            trainer.cycle_latent_dim(-1)
+            return True
+        return False
 
     def draw(self, snapshot: dict[str, object], window: object) -> None:
         layout = window.layout(secondary=True)
@@ -44,5 +62,6 @@ class EncodeRenderer:
                 f"shape: {shape_name}",
                 f"sample error: {error:.5f}",
                 f"latent dim: {int(self.config.latent_dim)}",
+                "keys: up/down dataset, left/right latent dim",
             ),
         )

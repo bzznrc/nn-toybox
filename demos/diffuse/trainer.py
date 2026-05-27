@@ -7,6 +7,8 @@ import torch
 from torch import nn
 
 from core.checkpoints import RunPaths
+from core.cycling import cycle_value
+from core.generated_2d import DIFFUSION_DATASET_KEYS
 from core.plotting import save_diffusion_plot, save_loss_curve
 from core.torch_utils import torch_device
 from core.utils import set_seed
@@ -27,7 +29,7 @@ class DiffuseTrainer:
         set_seed(int(self.config.seed))
         self.rng = np.random.default_rng(int(self.config.seed))
         self.clean = make_dataset(
-            self.config.dataset,
+            self.config.distribution,
             n=int(self.config.n_points),
             noise=float(self.config.noise),
             seed=int(self.config.seed),
@@ -46,6 +48,14 @@ class DiffuseTrainer:
         self._trajectory = np.zeros((1, 0, 2), dtype=np.float32)
         self._noisy = self._make_noisy()
         self._refresh_samples(force=True)
+
+    def cycle_distribution(self, delta: int = 1) -> None:
+        self.config.distribution = cycle_value(DIFFUSION_DATASET_KEYS, self.config.distribution, delta)
+        self.reset(int(self.config.seed))
+
+    def cycle_noise_schedule(self, delta: int = 1) -> None:
+        self.config.noise_schedule = cycle_value(("linear", "cosine"), self.config.noise_schedule, delta)
+        self.reset(int(self.config.seed))
 
     def _make_noisy(self) -> np.ndarray:
         with torch.inference_mode():
@@ -100,11 +110,13 @@ class DiffuseTrainer:
         return {
             "demo": "diffuse",
             "dataset": self.config.dataset,
+            "distribution": self.config.distribution,
             "step": int(self.step_count),
             "sample_step": int(self._sample_step),
             "loss": self.last_loss,
             "timesteps": int(self.config.timesteps),
             "sample_timesteps": int(self.config.sample_timesteps),
+            "noise_schedule": str(self.config.noise_schedule),
         }
 
     def snapshot(self) -> dict[str, object]:

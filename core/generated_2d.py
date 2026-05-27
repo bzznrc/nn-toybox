@@ -6,14 +6,32 @@ import math
 
 import numpy as np
 
-from core.datasets import DISTRIBUTION_DATASET_KEYS, dataset_display_names, dataset_key
 
-CLASSIFICATION_DATASET_KEYS = DISTRIBUTION_DATASET_KEYS
-DIFFUSION_DATASET_KEYS = tuple(
-    key for key in DISTRIBUTION_DATASET_KEYS if key in {"gaussian_mixtures", "rings", "moons", "checkerboard", "spirals"}
+DISTRIBUTION_VARIANT_KEYS = (
+    "blobs",
+    "gaussian_mixtures",
+    "circles",
+    "rings",
+    "moons",
+    "xor",
+    "checkerboard",
+    "spirals",
 )
-CLASSIFICATION_DATASETS = dataset_display_names(CLASSIFICATION_DATASET_KEYS)
-DIFFUSION_DATASETS = dataset_display_names(DIFFUSION_DATASET_KEYS)
+DIFFUSION_VARIANT_KEYS = tuple(
+    key for key in DISTRIBUTION_VARIANT_KEYS if key in {"gaussian_mixtures", "rings", "moons", "checkerboard", "spirals"}
+)
+CLASSIFICATION_DATASET_KEYS = DISTRIBUTION_VARIANT_KEYS
+DIFFUSION_DATASET_KEYS = DIFFUSION_VARIANT_KEYS
+CLASSIFICATION_DATASETS = DISTRIBUTION_VARIANT_KEYS
+DIFFUSION_DATASETS = DIFFUSION_VARIANT_KEYS
+
+
+def normalize_distribution_variant(value: object, *, choices: tuple[str, ...] = DISTRIBUTION_VARIANT_KEYS) -> str:
+    key = str(value).strip().lower().replace("-", "_")
+    if key not in choices:
+        valid = ", ".join(choices)
+        raise ValueError(f"Unknown distribution variant '{value}'. Valid: {valid}")
+    return key
 
 
 def _standardize(points: np.ndarray, scale: float = 1.3) -> np.ndarray:
@@ -127,7 +145,7 @@ def make_2d_classification(
     noise: float = 0.08,
     seed: int = 0,
 ) -> tuple[np.ndarray, np.ndarray]:
-    key = dataset_key(name)
+    key = normalize_distribution_variant(name, choices=CLASSIFICATION_DATASET_KEYS)
     if key == "blobs":
         return make_blobs(n, noise, seed)
     if key == "gaussian_mixtures":
@@ -145,7 +163,7 @@ def make_2d_classification(
     if key == "spirals":
         return make_spirals(n, noise, seed)
     valid = ", ".join(CLASSIFICATION_DATASETS)
-    raise ValueError(f"Unknown classification dataset '{name}'. Valid: {valid}")
+    raise ValueError(f"Unknown classification distribution '{name}'. Valid: {valid}")
 
 
 def make_point_cloud(
@@ -154,7 +172,7 @@ def make_point_cloud(
     noise: float = 0.04,
     seed: int = 0,
 ) -> np.ndarray:
-    key = dataset_key(name)
+    key = normalize_distribution_variant(name, choices=DIFFUSION_DATASET_KEYS)
     if key == "gaussian_mixtures":
         points, _labels = make_gaussian_mixtures(n, noise, seed)
         return points
@@ -171,4 +189,4 @@ def make_point_cloud(
         points, _labels = make_spirals(n, noise, seed)
         return points
     valid = ", ".join(DIFFUSION_DATASETS)
-    raise ValueError(f"Unknown point-cloud dataset '{name}'. Valid: {valid}")
+    raise ValueError(f"Unknown point-cloud distribution '{name}'. Valid: {valid}")

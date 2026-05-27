@@ -1,19 +1,82 @@
 # attend
 
-Tiny self-attention on synthetic subject-verb agreement sentences.
+Purpose: show attention as choosing context.
 
-Default display: `python -m nn_toybox.display --demo attend`
+`attend` trains a tiny single-head self-attention model on synthetic subject-verb agreement sentences. It predicts whether the masked verb should be `is` or `are`.
 
-Headless run: `python -m nn_toybox.run --demo attend --steps 1000`
+## Clip
 
-Example:
+![Attend Demo](../../media/attend.gif)
+
+## In Simple Terms
+
+The sentence contains a true subject and a nearby distractor noun:
 
 ```text
 the dogs near the cat [MASK] noisy
-near the cats , the dog [MASK] noisy
-today the dog behind the cats [MASK] loud
 ```
 
-The target is `is` or `are` based on the subject, even when the closer noun is a misleading distractor.
+The target is `are`, because the verb agrees with `dogs`, not the closer noun `cat`. The model must learn which word matters for the masked verb.
 
-This is not language modeling and not a full transformer. It is a small toy that shows one useful attention idea: the model learns which word matters for the current decision.
+## What The Model Does
+
+Default shape:
+
+```text
+Token ids
+Token embedding + positional embedding
+Single self-attention head
+Tiny classifier from the [MASK] token representation
+Output: is / are logits
+```
+
+Sentences are generated from small static tables. Several templates move the subject, distractor, and mask around, so fixed-position shortcuts are less useful. A configurable trap rate makes the distractor often have the opposite number from the subject.
+
+This is a tiny self-attention toy, not a language model and not a full transformer.
+
+## What To Look For Visually
+
+- Token cells across the main panel.
+- The `[MASK]` row or links emphasized.
+- The true subject marked as the correct source.
+- The distractor marked as the tempting nearby wrong source.
+- The strongest attention shifting toward the subject as training improves.
+- Secondary `is`/`are` bars separating as confidence grows.
+
+## Important Knobs
+
+- `--trap-rate`
+- `--embedding-dim`
+- `--attention-dim`
+- `--batch-size`
+- `--lr`
+- `--steps-per-frame`
+
+Display controls:
+
+- `G`: generate/show a new sentence
+- `H`: cycle highlighted attention row
+- `Space`: pause/resume
+- `R`: reset
+
+## Failure Cases Worth Trying
+
+```bash
+python -m scripts.display --demo attend --steps 30
+python -m scripts.display --demo attend --trap-rate 1.0
+python -m scripts.display --demo attend --embedding-dim 4 --attention-dim 4
+```
+
+Short training keeps attention noisy. Very small dimensions make the agreement rule harder to settle cleanly.
+
+## Display Command
+
+```bash
+python -m scripts.display --demo attend
+```
+
+## Headless Run Command
+
+```bash
+python -m scripts.run --demo attend --steps 1000
+```

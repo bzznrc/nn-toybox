@@ -28,16 +28,16 @@ class TraceRenderer:
         del modifiers
         trainer = window.trainer
         if symbol == arcade.key.RIGHT:
-            trainer.next_variation(1)
-            return True
-        if symbol == arcade.key.LEFT:
-            trainer.next_variation(-1)
-            return True
-        if symbol == arcade.key.UP:
             trainer.cycle_digit(1)
             return True
-        if symbol == arcade.key.DOWN:
+        if symbol == arcade.key.LEFT:
             trainer.cycle_digit(-1)
+            return True
+        if symbol == arcade.key.UP:
+            trainer.next_variation(1)
+            return True
+        if symbol == arcade.key.DOWN:
+            trainer.next_variation(-1)
             return True
         if symbol == arcade.key.G:
             trainer.random_example()
@@ -46,10 +46,10 @@ class TraceRenderer:
             self.show_edges = not self.show_edges
             return True
         if symbol == arcade.key.LEFT_BRACKET:
-            trainer.cycle_digit(-1)
+            trainer.next_variation(-1)
             return True
         if symbol == arcade.key.RIGHT_BRACKET:
-            trainer.cycle_digit(1)
+            trainer.next_variation(1)
             return True
         if symbol == arcade.key.BACKSPACE:
             trainer.clear_digit_filter()
@@ -247,5 +247,6 @@ class TraceRenderer:
             f"result: {status}",
             f"variation: {int(snapshot.get('variation_index', 0)) + 1}",
             f"zoom: {self.zoom:.2f}x",
+            "keys: up/down variation, left/right digit",
         ]
         window.draw_info(snapshot, secondary=True, extra=tuple(extra), compact=True)

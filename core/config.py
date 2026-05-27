@@ -81,7 +81,7 @@ ConfigT = TypeVar("ConfigT", bound=CommonConfig)
 
 
 def add_common_args(parser: argparse.ArgumentParser, demo_choices: Sequence[str], *, require_demo: bool = True) -> None:
-    parser.add_argument("--demo", required=bool(require_demo), choices=tuple(demo_choices))
+    parser.add_argument("--demo", required=bool(require_demo), metavar="{" + ",".join(demo_choices) + "}")
     parser.add_argument("--dataset", default=None)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", default="cpu", choices=["cpu", "cuda", "auto"])
