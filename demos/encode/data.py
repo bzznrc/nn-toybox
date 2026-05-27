@@ -1,4 +1,4 @@
-"""Generated image datasets for autoencode."""
+"""Generated image datasets for encode."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def make_dataset(
     if key == "patterns":
         return make_patterns(n=int(n), size=int(size), seed=int(seed), noise=float(noise))
     valid = ", ".join(DATASETS)
-    raise ValueError(f"Unknown autoencode dataset '{name}'. Valid: {valid}")
+    raise ValueError(f"Unknown encode dataset '{name}'. Valid: {valid}")
 
 
 __all__ = ["DATASETS", "PATTERN_NAMES", "SHAPE_NAMES", "make_dataset"]

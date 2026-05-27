@@ -22,7 +22,7 @@ from core.arcade_style import (
     TOYBOX_CHART_FILL_ALPHA,
     TOYBOX_CHART_TRACK_ALPHA,
 )
-from core.arcade_view import clamp_point_to_rect, draw_diamond_marker, fit_points_to_panel, with_alpha
+from core.arcade_view import clipped_rect, clamp_point_to_rect, draw_diamond_marker, draw_diamond_node, fit_points_to_panel, with_alpha
 from demos.embed.config import EmbedConfig
 
 
@@ -76,49 +76,51 @@ class EmbedRenderer:
         nearest: list[tuple[float, int]] = []
         selected_xy = xy[selected]
         nearest = self._nearest(coords, selected)
-        for score, idx in nearest[:3]:
-            alpha = int(55 + max(0.0, score) * 150)
-            arcade.draw_line(selected_xy[0], selected_xy[1], xy[idx, 0], xy[idx, 1], with_alpha(COLOR_FOG_GRAY, alpha), 1.5)
-        for idx, point in enumerate(xy):
-            is_selected = idx == selected
-            outer, inner = self.GROUP_COLOR_PAIRS.get(groups[idx], (COLOR_SLATE_GRAY, COLOR_DARK_NEUTRAL))
-            if is_selected:
-                arcade.draw_polygon_filled(
-                    [
-                        (float(point[0]), float(point[1]) + 10.0),
-                        (float(point[0]) + 10.0, float(point[1])),
-                        (float(point[0]), float(point[1]) - 10.0),
-                        (float(point[0]) - 10.0, float(point[1])),
-                    ],
-                    with_alpha(COLOR_FOG_GRAY, 42),
+        with clipped_rect(main_rect):
+            for score, idx in nearest[:3]:
+                alpha = int(55 + max(0.0, score) * 150)
+                arcade.draw_line(selected_xy[0], selected_xy[1], xy[idx, 0], xy[idx, 1], with_alpha(COLOR_FOG_GRAY, alpha), 1.5)
+            for idx, point in enumerate(xy):
+                is_selected = idx == selected
+                outer, inner = self.GROUP_COLOR_PAIRS.get(groups[idx], (COLOR_SLATE_GRAY, COLOR_DARK_NEUTRAL))
+                if is_selected:
+                    draw_diamond_node(
+                        float(point[0]),
+                        float(point[1]),
+                        radius=13.0,
+                        fill_color=COLOR_FOG_GRAY,
+                        outline_color=COLOR_FOG_GRAY,
+                        alpha=42,
+                        outline_alpha=0,
+                        outline_width=0.0,
+                    )
+                draw_diamond_marker(
+                    float(point[0]),
+                    float(point[1]),
+                    outer_color=outer,
+                    inner_color=inner,
+                    marker="regular",
+                    alpha=245 if groups[idx] else 175,
                 )
-            draw_diamond_marker(
-                float(point[0]),
-                float(point[1]),
-                outer_color=outer,
-                inner_color=inner,
-                marker="regular",
-                alpha=245 if groups[idx] else 175,
+            label_width = window.text_cache.measure_width(tokens[selected], font_size=12, anchor_y="center")
+            label_x, label_y = clamp_point_to_rect(
+                float(selected_xy[0]) + 12.0,
+                float(selected_xy[1]) + 12.0,
+                (
+                    main_rect[0],
+                    main_rect[1] + 6.0,
+                    max(1.0, main_rect[2] - label_width),
+                    max(1.0, main_rect[3] - 12.0),
+                ),
             )
-        label_width = window.text_cache.measure_width(tokens[selected], font_size=12, anchor_y="center")
-        label_x, label_y = clamp_point_to_rect(
-            float(selected_xy[0]) + 12.0,
-            float(selected_xy[1]) + 12.0,
-            (
-                main_rect[0],
-                main_rect[1] + 6.0,
-                max(1.0, main_rect[2] - label_width),
-                max(1.0, main_rect[3] - 12.0),
-            ),
-        )
-        window.text_cache.draw(
-            tokens[selected],
-            label_x,
-            label_y,
-            color=COLOR_FOG_GRAY,
-            font_size=12,
-            anchor_y="center",
-        )
+            window.text_cache.draw(
+                tokens[selected],
+                label_x,
+                label_y,
+                color=COLOR_FOG_GRAY,
+                font_size=12,
+                anchor_y="center",
+            )
 
         left, bottom, width, height = secondary_rect
         bar_gap = 8.0

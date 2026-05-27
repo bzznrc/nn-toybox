@@ -1,4 +1,4 @@
-"""Autoencode demo configuration."""
+"""Encode demo configuration."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from core.config import CommonConfig
 
 
 @dataclass
-class AutoencodeConfig(CommonConfig):
+class EncodeConfig(CommonConfig):
     lr: float = 0.003
     hidden_dim: int = 64
     image_size: int = 16
@@ -19,7 +19,7 @@ class AutoencodeConfig(CommonConfig):
     noise: float = 0.02
 
 
-def add_autoencode_args(parser: argparse.ArgumentParser) -> None:
+def add_encode_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--image-size", type=int, default=16)
     parser.add_argument("--n-samples", type=int, default=512)
     parser.add_argument("--shape-types", default="all")

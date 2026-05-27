@@ -7,7 +7,7 @@ from typing import Sequence
 
 from core.checkpoints import create_run_from_config, write_json
 from core.config import add_common_args, config_from_args, to_dict
-from core.registry import DEMO_ORDER, get_demo_spec
+from core.registry import DEMO_ORDER, get_demo_spec, validate_demo_dataset
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -26,7 +26,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> None:
     args = parse_args(argv)
     spec = get_demo_spec(args.demo)
-    config = config_from_args(spec.config_cls, args, default_dataset=spec.default_dataset)
+    try:
+        config = config_from_args(spec.config_cls, args, default_dataset=spec.default_dataset)
+        config.dataset = validate_demo_dataset(spec, config.dataset)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from None
     trainer = spec.trainer_cls()(config)
     run_paths = create_run_from_config(config)
     write_json(run_paths.config_path, to_dict(config))

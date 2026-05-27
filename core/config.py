@@ -40,7 +40,7 @@ from core.arcade_style import (
     screen_height,
     screen_width,
 )
-from core.datasets import dataset_display_name
+from core.datasets import canonical_dataset_name
 from core.shared_config import PLAYFIELD_HEIGHT, SCREEN_HEIGHT, SCREEN_WIDTH, SHOW_FPS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -139,7 +139,7 @@ def config_from_args(config_cls: type[ConfigT], args: argparse.Namespace, *, def
         if value is not None:
             payload[field.name] = value
     payload["demo"] = str(args.demo)
-    payload["dataset"] = dataset_display_name(args.dataset or default_dataset)
+    payload["dataset"] = canonical_dataset_name(args.dataset or default_dataset)
     payload["device"] = normalize_device(str(payload.get("device", "cpu")))
     resolver = getattr(config_cls, "resolve_payload", None)
     if callable(resolver):

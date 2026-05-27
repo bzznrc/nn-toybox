@@ -1,4 +1,4 @@
-"""Live and headless trainer for the autoencode demo."""
+"""Live and headless trainer for the encode demo."""
 
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ from torch import nn
 from core.checkpoints import RunPaths
 from core.plotting import save_loss_curve, save_reconstruction_grid
 from core.utils import set_seed
-from demos.autoencode.config import AutoencodeConfig
-from demos.autoencode.data import make_dataset
-from demos.autoencode.model import TinyAutoencoder
+from demos.encode.config import EncodeConfig
+from demos.encode.data import make_dataset
+from demos.encode.model import TinyEncodeModel
 
 
 def _torch_device(name: str) -> torch.device:
@@ -20,8 +20,8 @@ def _torch_device(name: str) -> torch.device:
     return torch.device("cpu")
 
 
-class AutoencodeTrainer:
-    def __init__(self, config: AutoencodeConfig) -> None:
+class EncodeTrainer:
+    def __init__(self, config: EncodeConfig) -> None:
         self.config = config
         self.device = _torch_device(config.device)
         self.reset(int(config.seed))
@@ -39,7 +39,7 @@ class AutoencodeTrainer:
             seed=int(self.config.seed),
         )
         input_dim = int(self.config.image_size) * int(self.config.image_size)
-        self.model = TinyAutoencoder(
+        self.model = TinyEncodeModel(
             input_dim=input_dim,
             latent_dim=int(self.config.latent_dim),
             hidden_size=int(self.config.hidden_dim),
@@ -82,7 +82,7 @@ class AutoencodeTrainer:
         images, recons, _latents, _labels = self._preview()
         error = float(np.mean((images - recons) ** 2))
         return {
-            "demo": "autoencode",
+            "demo": "encode",
             "dataset": self.config.dataset,
             "step": int(self.step_count),
             "loss": self.last_loss,
@@ -132,5 +132,5 @@ class AutoencodeTrainer:
             error=error,
         )
         if self.losses:
-            save_loss_curve(self.losses, run_paths.artifact_dir / "loss.png", title="autoencode loss")
+            save_loss_curve(self.losses, run_paths.artifact_dir / "loss.png", title="encode loss")
         save_reconstruction_grid(self.images, recons, run_paths.artifact_dir / "reconstructions.png")

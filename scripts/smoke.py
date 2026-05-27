@@ -21,7 +21,7 @@ def _args_for(demo: str, output_dir: str | None) -> list[str]:
     args = ["--demo", demo, "--steps", "2", "--run-name", f"{demo}_smoke", "--save-every", "0"]
     if demo == "grad":
         args.extend(["--dataset", "Distributions - Moons", "--n-points", "64", "--batch-size", "32"])
-    if demo == "autoencode":
+    if demo == "encode":
         args.extend(["--n-samples", "64", "--batch-size", "32"])
     if demo == "diffuse":
         args.extend(
@@ -42,6 +42,14 @@ def _args_for(demo: str, output_dir: str | None) -> list[str]:
                 "2",
             ]
         )
+    if demo == "trace":
+        args.extend(["--batch-size", "32", "--top-k-edges", "24"])
+    if demo == "conv":
+        args.extend(["--batch-size", "32", "--channels", "4"])
+    if demo == "attend":
+        args.extend(["--batch-size", "32", "--embedding-dim", "8", "--attention-dim", "8"])
+    if demo == "optim":
+        args.extend(["--landscape-resolution", "20", "--trail-length", "16"])
     if output_dir is not None:
         args.extend(["--output-dir", str(Path(output_dir))])
     return args

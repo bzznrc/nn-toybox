@@ -24,6 +24,7 @@ TOYBOX_TEXT_RIGHT_PADDING = 14.0
 TOYBOX_TEXT_SCROLL_WIDTH = 8.0
 TOYBOX_CHART_TRACK_ALPHA = 70
 TOYBOX_CHART_FILL_ALPHA = 210
+TOYBOX_CONNECTION_LINE_WIDTH = 1.5
 
 INTER_FONT_NAME = ("Inter", "Inter Regular", "Arial", "sans-serif")
 GAME_UI_FONT_NAME = INTER_FONT_NAME
@@ -88,12 +89,12 @@ CLASS_COLOR_PAIRS = (
 
 
 POINT_MARKERS = {
-    "regular": {
-        "outer_radius": 7.0,
-        "inner_radius": 4.2,
-    },
     "small": {
         "outer_radius": 5.0,
         "inner_radius": 3.0,
+    },
+    "regular": {
+        "outer_radius": 7.0,
+        "inner_radius": 4.2,
     },
 }

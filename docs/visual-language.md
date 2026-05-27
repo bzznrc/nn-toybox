@@ -48,6 +48,14 @@ Sidebar text should be compact but readable. It wraps inside the text region and
 
 The `Key:` part of a `Key: Value` line is bold. Wrapped continuation lines start at the normal text left edge.
 
+## Digit Browsing
+
+Any demo browsing the bundled digits dataset should use the shared `Digits8Browser` semantics:
+
+- Left/right arrows move through variations of the current digit.
+- Up/down arrows move through digit classes while keeping the same variation slot when possible.
+- `G` may select a random example.
+
 ## Palette
 
 Use the shared palette exactly. Main/secondary pairs are used together: the outer diamond uses the main color and the inner diamond uses the matching secondary color.
@@ -75,12 +83,20 @@ Point markers are four-sided diamonds. They are clipped by the shared renderer: 
 
 Marker sizes:
 
-- `regular`: outer radius `7.0`, inner radius `4.2`
 - `small`: outer radius `5.0`, inner radius `3.0`
+- `regular`: outer radius `7.0`, inner radius `4.2`
 
 Embed uses `regular` markers. Grad and Diffuse use `small` markers for denser point clouds.
 
 Diamonds always use the two-layer treatment: outer main color, inner paired secondary color. Do not draw fill-only point diamonds in demos.
+
+## Network Lines
+
+Network connection lines use neutral palette colors only and a fixed design-language width:
+
+- `TOYBOX_CONNECTION_LINE_WIDTH = 1.5`
+
+Use opacity to encode strength instead of changing hue or thickness. Preferred stepped opacity levels are 0%, 25%, 50%, and 75%.
 
 ## Charts
 

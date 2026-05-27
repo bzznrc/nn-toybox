@@ -1,12 +1,12 @@
-# autoencode
+# encode
 
 Purpose: show how a neural network compresses and reconstructs data.
 
-`autoencode` trains a tiny fully connected autoencoder on generated 16x16 image datasets. V1 includes `Images - Icons` and `Images - Patterns`.
+`encode` trains a tiny fully connected bottleneck model on generated 16x16 image datasets. V1 includes `Images - Icons` and `Images - Patterns`.
 
 ## Clip
 
-![Autoencode Demo](../../media/autoencode.gif)
+![Encode Demo](../../media/encode.gif)
 
 ## In Simple Terms
 
@@ -43,13 +43,13 @@ Defaults:
 ## Commands
 
 ```bash
-python -m scripts.view --demo autoencode
-python -m scripts.view --demo autoencode --dataset "Images - Patterns"
-python -m scripts.view --demo autoencode --latent-dim 2
-python -m scripts.view --demo autoencode --latent-dim 16 --hidden-dim 96
+python -m nn_toybox.display --demo encode
+python -m nn_toybox.display --demo encode --dataset "Images - Patterns"
+python -m nn_toybox.display --demo encode --latent-dim 2
+python -m nn_toybox.display --demo encode --latent-dim 16 --hidden-dim 96
 
-python -m scripts.train --demo autoencode --steps 1000
-python -m scripts.capture_demo --demo autoencode
+python -m nn_toybox.run --demo encode --steps 1000
+python -m scripts.capture_demo --demo encode
 ```
 
 ## Look For
@@ -73,7 +73,7 @@ python -m scripts.capture_demo --demo autoencode
 ## Failure Cases Worth Trying
 
 ```bash
-python -m scripts.view --demo autoencode --latent-dim 1
-python -m scripts.view --demo autoencode --noise 0.15
-python -m scripts.view --demo autoencode --hidden-dim 16
+python -m nn_toybox.display --demo encode --latent-dim 1
+python -m nn_toybox.display --demo encode --noise 0.15
+python -m nn_toybox.display --demo encode --hidden-dim 16
 ```

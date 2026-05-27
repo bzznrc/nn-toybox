@@ -9,7 +9,7 @@ import arcade
 
 from core.arcade_view import LiveTrainingWindow
 from core.config import add_common_args, add_display_args, config_from_args, display_config_from_args
-from core.registry import DEMO_ORDER, get_demo_spec
+from core.registry import DEMO_ORDER, get_demo_spec, validate_demo_dataset
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -30,7 +30,11 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> None:
     args = parse_args(argv)
     spec = get_demo_spec(args.demo)
-    config = config_from_args(spec.config_cls, args, default_dataset=spec.default_dataset)
+    try:
+        config = config_from_args(spec.config_cls, args, default_dataset=spec.default_dataset)
+        config.dataset = validate_demo_dataset(spec, config.dataset)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from None
     display_config = display_config_from_args(args)
     trainer = spec.trainer_cls()(config)
     renderer = spec.renderer_cls()(config)

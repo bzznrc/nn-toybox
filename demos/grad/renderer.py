@@ -6,7 +6,7 @@ import arcade
 import numpy as np
 
 from core.arcade_style import CLASS_COLOR_PAIRS, COLOR_BRICK_RED, COLOR_CORAL, COLOR_FOG_GRAY
-from core.arcade_view import clamp_point_to_rect, draw_curve, draw_diamond_marker, draw_points, marker_outer_radius, with_alpha
+from core.arcade_view import clipped_rect, clamp_point_to_rect, draw_curve, draw_diamond_marker, draw_points, marker_outer_radius, with_alpha
 from demos.grad.config import GradConfig
 
 
@@ -23,23 +23,24 @@ class GradRenderer:
         left, bottom, width, height = main_rect
         cell_w = width / float(resolution)
         cell_h = height / float(resolution)
-        for idx, label in enumerate(pred[: resolution * resolution]):
-            col = idx % resolution
-            row = idx // resolution
-            outer, _inner = CLASS_COLOR_PAIRS[int(label) % len(CLASS_COLOR_PAIRS)]
-            arcade.draw_lbwh_rectangle_filled(
-                left + col * cell_w,
-                bottom + row * cell_h,
-                cell_w,
-                cell_h,
-                with_alpha(outer, 36),
+        with clipped_rect(main_rect):
+            for idx, label in enumerate(pred[: resolution * resolution]):
+                col = idx % resolution
+                row = idx // resolution
+                outer, _inner = CLASS_COLOR_PAIRS[int(label) % len(CLASS_COLOR_PAIRS)]
+                arcade.draw_lbwh_rectangle_filled(
+                    left + col * cell_w,
+                    bottom + row * cell_h,
+                    cell_w,
+                    cell_h,
+                    with_alpha(outer, 36),
+                )
+            draw_points(
+                np.asarray(snapshot["points"], dtype=np.float32),
+                np.asarray(snapshot["labels"], dtype=np.int64),
+                main_rect,
+                marker="small",
             )
-        draw_points(
-            np.asarray(snapshot["points"], dtype=np.float32),
-            np.asarray(snapshot["labels"], dtype=np.int64),
-            main_rect,
-            marker="small",
-        )
         losses = np.asarray(snapshot["losses"], dtype=np.float32)
         draw_curve(losses, loss_rect, color=COLOR_FOG_GRAY)
         if losses.size >= 2:

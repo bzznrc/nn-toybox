@@ -1,14 +1,17 @@
 # VS Code Launch Notes
 
-The Run and Debug menu has three shared entries:
+The Run and Debug menu has four shared entries:
 
-- `Train`: headless training/export through `scripts.train`
-- `View`: live Arcade training through `scripts.view`
+- `Run`: headless run/export through `nn_toybox.run`
+- `Display`: live Arcade display through `nn_toybox.display`
+- `Train Model`: headless model-training run for pretraining-style demos
 - `Capture`: live Arcade GIF capture through `scripts.capture_demo`
 
-Each entry asks for:
+The shared `Run`, `Display`, and `Capture` entries ask for:
 
 1. `Demo`
 2. `Dataset`
 
-Run names and capture filenames are automatic. The full dataset list is shared across demos; choose a typed dataset such as `Distributions - Moons`, `Text - Tiny Semantics`, or `Images - Icons` that belongs to the selected demo.
+`Train Model` asks for a model demo, the model-training dataset, step count, and save cadence. Run names and capture filenames are automatic. The full dataset list is shared across demos; choose the exact canonical dataset name shown in the picker, such as `Distributions - Moons`, `Text - Tiny Semantics`, `Digits - 8x8 Mini`, `Text - Subject Verb Agreement`, or `Optimization - Loss Landscapes`. Aliases are intentionally not accepted, and invalid demo/dataset pairings fail before the demo starts.
+
+`Run` is the old `Train` entry renamed around the shared headless entrypoint. `Train Model` is also headless and intentionally opens no Arcade window.

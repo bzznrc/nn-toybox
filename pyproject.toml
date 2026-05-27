@@ -19,6 +19,8 @@ dependencies = [
 [project.scripts]
 nn-toybox-train = "scripts.train:main"
 nn-toybox-view = "scripts.view:main"
+nn-toybox-run = "nn_toybox.run:main"
+nn-toybox-display = "nn_toybox.display:main"
 nn-toybox-capture-demo = "scripts.capture_demo:main"
 nn-toybox-smoke = "scripts.smoke:main"
 
@@ -27,4 +29,4 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["core*", "scripts*", "demos*"]
+include = ["core*", "scripts*", "demos*", "nn_toybox*"]

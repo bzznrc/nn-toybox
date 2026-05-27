@@ -2,11 +2,28 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Train",
+      "name": "Run",
       "type": "debugpy",
       "request": "launch",
       "python": "${workspaceFolder}/../GameEnv/Scripts/python.exe",
-      "module": "scripts.train",
+      "module": "nn_toybox.run",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "args": [
+        "--demo",
+        "${input:activeDemo}",
+        "--dataset",
+        "${input:activeDataset}",
+        "--steps",
+        "${input:runSteps}"
+      ]
+    },
+    {
+      "name": "Display",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${workspaceFolder}/../GameEnv/Scripts/python.exe",
+      "module": "nn_toybox.display",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "args": [
@@ -17,18 +34,22 @@
       ]
     },
     {
-      "name": "View",
+      "name": "Train Model",
       "type": "debugpy",
       "request": "launch",
       "python": "${workspaceFolder}/../GameEnv/Scripts/python.exe",
-      "module": "scripts.view",
+      "module": "nn_toybox.run",
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "args": [
         "--demo",
-        "${input:activeDemo}",
+        "${input:trainModelDemo}",
         "--dataset",
-        "${input:activeDataset}"
+        "${input:trainModelDataset}",
+        "--steps",
+        "${input:trainModelSteps}",
+        "--save-every",
+        "${input:saveEvery}"
       ]
     },
     {
@@ -59,8 +80,22 @@
       "options": [
         "grad",
         "embed",
-        "autoencode",
-        "diffuse"
+        "encode",
+        "diffuse",
+        "trace",
+        "conv",
+        "attend",
+        "optim"
+      ]
+    },
+    {
+      "id": "trainModelDemo",
+      "type": "pickString",
+      "description": "Model demo to train headlessly",
+      "default": "trace",
+      "options": [
+        "trace",
+        "conv"
       ]
     },
     {
@@ -80,8 +115,38 @@
         "Text - Tiny Semantics",
         "Text - Big Tiny Semantics",
         "Images - Icons",
-        "Images - Patterns"
+        "Images - Patterns",
+        "Digits - 8x8 Mini",
+        "Text - Subject Verb Agreement",
+        "Optimization - Loss Landscapes"
       ]
+    },
+    {
+      "id": "trainModelDataset",
+      "type": "pickString",
+      "description": "Model training dataset",
+      "default": "Digits - 8x8 Mini",
+      "options": [
+        "Digits - 8x8 Mini"
+      ]
+    },
+    {
+      "id": "runSteps",
+      "type": "promptString",
+      "description": "Run steps",
+      "default": "1000"
+    },
+    {
+      "id": "trainModelSteps",
+      "type": "promptString",
+      "description": "Train model steps",
+      "default": "1000"
+    },
+    {
+      "id": "saveEvery",
+      "type": "promptString",
+      "description": "Save every N steps",
+      "default": "250"
     }
   ]
 }

@@ -1,16 +1,16 @@
-"""Arcade renderer for live autoencode snapshots."""
+"""Arcade renderer for live encode snapshots."""
 
 from __future__ import annotations
 
 import numpy as np
 
 from core.arcade_style import COLOR_AQUA, COLOR_CORAL
-from core.arcade_view import draw_pixel_image, draw_vertical_bars, split_columns
-from demos.autoencode.config import AutoencodeConfig
+from core.arcade_view import clipped_rect, draw_pixel_image, draw_vertical_bars, split_columns
+from demos.encode.config import EncodeConfig
 
 
-class AutoencodeRenderer:
-    def __init__(self, config: AutoencodeConfig) -> None:
+class EncodeRenderer:
+    def __init__(self, config: EncodeConfig) -> None:
         self.config = config
 
     @staticmethod
@@ -40,8 +40,9 @@ class AutoencodeRenderer:
         idx = (int(metrics.get("step", 0)) // 20) % max(1, len(images))
         image = images[idx]
         recon = recons[idx]
-        self._draw_image_in_rect(image, image_rects[0], COLOR_AQUA)
-        self._draw_image_in_rect(recon, image_rects[1], COLOR_CORAL)
+        with clipped_rect(main_rect):
+            self._draw_image_in_rect(image, image_rects[0], COLOR_AQUA)
+            self._draw_image_in_rect(recon, image_rects[1], COLOR_CORAL)
         latent = latents[idx]
         draw_vertical_bars(latent, latent_rect)
         labels = np.asarray(snapshot["labels"], dtype=np.int64)

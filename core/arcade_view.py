@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import array
+from contextlib import contextmanager
 from dataclasses import dataclass
 from functools import lru_cache
 import math
@@ -20,6 +21,7 @@ from core.arcade_style import (
     CLASS_COLOR_PAIRS,
     COLOR_AQUA,
     COLOR_DARK_NEUTRAL,
+    COLOR_DEEP_TEAL,
     COLOR_FOG_GRAY,
     COLOR_LIGHT_NEUTRAL,
     COLOR_SLATE_GRAY,
@@ -485,6 +487,47 @@ def draw_toybox_frame(layout: ToyboxLayout) -> None:
     draw_panel_outline(layout.main, "")
 
 
+def _scissor_tuple(rect: tuple[float, float, float, float], *, inset: float = 0.0) -> tuple[int, int, int, int]:
+    left, bottom, width, height = rect
+    pad = max(0.0, float(inset))
+    x = int(round(float(left) + pad))
+    y = int(round(float(bottom) + pad))
+    w = int(round(max(0.0, float(width) - 2.0 * pad)))
+    h = int(round(max(0.0, float(height) - 2.0 * pad)))
+    return x, y, w, h
+
+
+def _intersect_scissor(a: tuple[int, int, int, int], b: tuple[int, int, int, int]) -> tuple[int, int, int, int]:
+    ax, ay, aw, ah = a
+    bx, by, bw, bh = b
+    left = max(ax, bx)
+    bottom = max(ay, by)
+    right = min(ax + aw, bx + bw)
+    top = min(ay + ah, by + bh)
+    return left, bottom, max(0, right - left), max(0, top - bottom)
+
+
+@contextmanager
+def clipped_rect(rect: tuple[float, float, float, float], *, inset: float = 0.0):
+    """Clip Arcade drawing to a panel rectangle.
+
+    Renderers should wrap main-panel drawing with this helper so zoomed or large
+    visuals cannot leak into neighboring panels.
+    """
+
+    window = get_window()
+    ctx = window.ctx
+    previous = ctx.scissor
+    scissor = _scissor_tuple(rect, inset=inset)
+    if previous is not None:
+        scissor = _intersect_scissor(tuple(int(v) for v in previous), scissor)
+    ctx.scissor = scissor
+    try:
+        yield
+    finally:
+        ctx.scissor = previous
+
+
 def world_to_panel(
     points: np.ndarray,
     rect: tuple[float, float, float, float],
@@ -547,6 +590,40 @@ def clamp_point_to_rect(
     )
 
 
+def diamond_points(x: float, y: float, radius: float) -> list[tuple[float, float]]:
+    cx = float(x)
+    cy = float(y)
+    r = float(radius)
+    return [(cx, cy + r), (cx + r, cy), (cx, cy - r), (cx - r, cy)]
+
+
+def draw_diamond_node(
+    x: float,
+    y: float,
+    *,
+    radius: float,
+    fill_color: tuple[int, int, int] | tuple[int, int, int, int],
+    outline_color: tuple[int, int, int] | tuple[int, int, int, int] = COLOR_DEEP_TEAL,
+    alpha: int = 230,
+    outline_alpha: int = 230,
+    outline_width: float = 1.5,
+    inner_radius: float | None = None,
+    inner_color: tuple[int, int, int] | tuple[int, int, int, int] | None = None,
+    inner_alpha: int | None = None,
+) -> None:
+    """Draw the shared diamond-square visual primitive used for nodes/markers."""
+
+    outer = diamond_points(float(x), float(y), float(radius))
+    arcade.draw_polygon_filled(outer, with_alpha(fill_color, alpha))
+    if float(outline_width) > 0.0 and int(outline_alpha) > 0:
+        arcade.draw_polygon_outline(outer, with_alpha(outline_color, outline_alpha), float(outline_width))
+    if inner_radius is not None and inner_color is not None:
+        arcade.draw_polygon_filled(
+            diamond_points(float(x), float(y), float(inner_radius)),
+            with_alpha(inner_color, alpha if inner_alpha is None else inner_alpha),
+        )
+
+
 def draw_diamond_marker(
     x: float,
     y: float,
@@ -561,13 +638,19 @@ def draw_diamond_marker(
     outer_radius = marker_outer_radius(marker)
     marker_spec = POINT_MARKERS[str(marker)]
     inner_radius = float(marker_spec["inner_radius"])
-
-    def diamond(radius: float) -> list[tuple[float, float]]:
-        r = float(radius)
-        return [(cx, cy + r), (cx + r, cy), (cx, cy - r), (cx - r, cy)]
-
-    arcade.draw_polygon_filled(diamond(outer_radius), with_alpha(outer_color, alpha))
-    arcade.draw_polygon_filled(diamond(inner_radius), with_alpha(inner_color, alpha))
+    draw_diamond_node(
+        cx,
+        cy,
+        radius=outer_radius,
+        fill_color=outer_color,
+        outline_color=outer_color,
+        alpha=alpha,
+        outline_alpha=0,
+        outline_width=0.0,
+        inner_radius=inner_radius,
+        inner_color=inner_color,
+        inner_alpha=alpha,
+    )
 
 
 def _draw_diamond_layer(
@@ -820,7 +903,8 @@ class LiveTrainingWindow(DemoWindow):
         self.trainer.step(self.steps_per_frame)
 
     def on_key_press(self, symbol: int, modifiers: int) -> None:
-        del modifiers
+        if self._renderer_mouse_event("on_key_press", symbol, modifiers):
+            return
         if symbol == arcade.key.SPACE:
             self.paused = not self.paused
         elif symbol == arcade.key.R:
@@ -875,19 +959,26 @@ class LiveTrainingWindow(DemoWindow):
         self._last_layout = toybox_layout(self.width, self.height, secondary=bool(secondary))
         return self._last_layout
 
-    def info_lines(self, snapshot: dict[str, object], extra: list[str] | tuple[str, ...] = ()) -> list[str]:
+    def info_lines(
+        self,
+        snapshot: dict[str, object],
+        extra: list[str] | tuple[str, ...] = (),
+        *,
+        compact: bool = False,
+    ) -> list[str]:
         metrics = dict(snapshot.get("metrics", self.trainer.metrics))
         loss = metrics.get("loss")
         loss_text = "N/A" if loss is None else f"{float(loss):.4f}"
-        head = [
+        head = [] if compact else [
             ("demo", self.toybox_config.demo),
             ("dataset", self.toybox_config.dataset),
         ]
         lines = [
             ("step", int(self.trainer.step_count)),
             ("loss", loss_text),
-            ("speed", f"{self.steps_per_frame} step/frame"),
         ]
+        if not compact:
+            lines.append(("speed", f"{self.steps_per_frame} step/frame"))
         if "accuracy" in metrics:
             lines.append(("accuracy", f"{float(metrics['accuracy']):.1%}"))
         if "mean_error" in metrics:
@@ -915,11 +1006,18 @@ class LiveTrainingWindow(DemoWindow):
         ordered = [*head, *selected_lines, *lines, *extra_lines]
         return [line for line in (format_info_line(item) for item in ordered) if line]
 
-    def draw_info(self, snapshot: dict[str, object], *, secondary: bool = False, extra: list[str] | tuple[str, ...] = ()) -> None:
+    def draw_info(
+        self,
+        snapshot: dict[str, object],
+        *,
+        secondary: bool = False,
+        extra: list[str] | tuple[str, ...] = (),
+        compact: bool = False,
+    ) -> None:
         layout = self.layout(secondary=secondary)
         max_scroll = draw_text_area(
             self.text_cache,
-            self.info_lines(snapshot, extra),
+            self.info_lines(snapshot, extra, compact=compact),
             layout.text,
             scroll=int(self.info_scroll),
         )
